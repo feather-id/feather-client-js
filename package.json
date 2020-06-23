@@ -1,0 +1,42 @@
+{
+  "name": "feather-client-js",
+  "version": "0.1.16",
+  "description": "Javascript library for the Feather API",
+  "main": "lib/feather.js",
+  "scripts": {
+    "test": "./node_modules/.bin/mocha --reporter spec 'test/**/*.spec.js'",
+    "cover": "./node_modules/.bin/nyc --reporter=lcov --reporter=text ./node_modules/.bin/mocha 'test/**/*.spec.js' --all --timeout 30000 --exit",
+    "coveralls": "cat coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/feather-id/feather-client-js.git"
+  },
+  "keywords": [
+    "authentication",
+    "authorization",
+    "feather",
+    "id",
+    "identity"
+  ],
+  "author": "Feather <hello@feather.id> (https://feather.id)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/feather-id/feather-client-js/issues"
+  },
+  "homepage": "https://github.com/feather-id/feather-client-js#readme",
+  "engines": {
+    "node": ">=4.2.4"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "coveralls": "^3.1.0",
+    "mocha": "^7.1.2",
+    "nock": "^12.0.3",
+    "nyc": "^15.0.1"
+  },
+  "dependencies": {
+    "chai-as-promised": "^7.1.1",
+    "jws": "^4.0.0"
+  }
+}
