@@ -1,4 +1,4 @@
-const ErrorCode = {
+const FeatherErrorCode = {
   API_KEY_EXPIRED: "api_key_expired",
   API_KEY_MISSING: "api_key_missing",
   API_KEY_INVALID: "api_key_invalid",
@@ -27,4 +27,4 @@ const ErrorCode = {
   VERIFICATION_CODE_ALEADY_USED: "verification_code_already_used"
 };
 
-module.exports = ErrorCode;
+module.exports = FeatherErrorCode;

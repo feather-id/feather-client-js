@@ -1,6 +1,10 @@
 const credentialTypes = require("../credentialTypes");
 const utils = require("../utils");
-const { FeatherError, ErrorType, ErrorCode } = require("../../errors");
+const {
+  FeatherError,
+  FeatherErrorType,
+  FeatherErrorCode
+} = require("../../errors");
 
 const credentials = {
   _gateway: null,
@@ -61,8 +65,8 @@ const credentials = {
       if (typeof id !== "string") {
         reject(
           new FeatherError({
-            type: ErrorType.VALIDATION,
-            code: ErrorCode.PARAMETER_INVALID,
+            type: FeatherErrorType.VALIDATION,
+            code: FeatherErrorCode.PARAMETER_INVALID,
             message: `expected param 'id' to be of type 'string'`
           })
         );

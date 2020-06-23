@@ -1,4 +1,4 @@
-const utils = require("../lib/client/utils");
+const utils = require("../src/client/utils");
 const nock = require("nock");
 
 const testUtils = {

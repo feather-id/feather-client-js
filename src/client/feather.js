@@ -1,7 +1,11 @@
 const HttpGateway = require("./httpGateway.js");
 const resources = require("./resources");
 const utils = require("./utils");
-const { FeatherError, ErrorType, ErrorCode } = require("../errors");
+const {
+  FeatherError,
+  FeatherErrorType,
+  FeatherErrorCode
+} = require("../errors");
 
 const ALLOWED_PROTOCOLS = ["https", "http"];
 const ALLOWED_CONFIG_PROPERTIES = ["protocol", "host", "port", "basePath"];
@@ -14,8 +18,8 @@ function Feather(apiKey, config = {}) {
   // Validate inputs
   if (typeof apiKey !== "string") {
     throw new FeatherError({
-      type: ErrorType.API_AUTHENTICATION,
-      code: ErrorCode.API_KEY_INVALID,
+      type: FeatherErrorType.API_AUTHENTICATION,
+      code: FeatherErrorCode.API_KEY_INVALID,
       message: `expected 'apiKey' to be of type 'string'`
     });
   }
@@ -53,8 +57,8 @@ Feather.prototype = {
     // Config can only be an object
     if (typeof config !== "object") {
       throw new FeatherError({
-        type: ErrorType.VALIDATION,
-        code: ErrorCode.PARAMETER_INVALID,
+        type: FeatherErrorType.VALIDATION,
+        code: FeatherErrorCode.PARAMETER_INVALID,
         message: `expected 'config' to be of type 'object'`
       });
     }
@@ -65,8 +69,8 @@ Feather.prototype = {
     );
     if (values.length > 0) {
       throw new FeatherError({
-        type: ErrorType.VALIDATION,
-        code: ErrorCode.PARAMETER_UNKNOWN,
+        type: FeatherErrorType.VALIDATION,
+        code: FeatherErrorCode.PARAMETER_UNKNOWN,
         message: `'config' contained the following unknown attributes: ${values.join(
           ", "
         )}`
@@ -76,8 +80,8 @@ Feather.prototype = {
     // Verify the protocol
     if (config.protocol && !ALLOWED_PROTOCOLS.includes(config.protocol)) {
       throw new FeatherError({
-        type: ErrorType.VALIDATION,
-        code: ErrorCode.PARAMETER_INVALID,
+        type: FeatherErrorType.VALIDATION,
+        code: FeatherErrorCode.PARAMETER_INVALID,
         message: `expected 'protocol' to be one of either: 'http' or 'https'`
       });
     }
@@ -86,6 +90,6 @@ Feather.prototype = {
   }
 };
 
-module.exports = { Feather, FeatherError, ErrorType, ErrorCode };
+module.exports = { Feather, FeatherError, FeatherErrorType, FeatherErrorCode };
 module.exports.Feather = Feather;
 module.exports.default = Feather;

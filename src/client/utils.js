@@ -1,4 +1,8 @@
-const { FeatherError, ErrorType, ErrorCode } = require("../errors");
+const {
+  FeatherError,
+  FeatherErrorType,
+  FeatherErrorCode
+} = require("../errors");
 
 const utils = {
   /**
@@ -83,8 +87,8 @@ const utils = {
     if (!data) {
       if (expects.isRequired) {
         throw new FeatherError({
-          type: ErrorType.VALIDATION,
-          code: ErrorCode.PARAMETER_MISSING,
+          type: FeatherErrorType.VALIDATION,
+          code: FeatherErrorCode.PARAMETER_MISSING,
           message: `required request data not provided`
         });
       } else {
@@ -93,8 +97,8 @@ const utils = {
     }
     if (typeof data !== "object") {
       throw new FeatherError({
-        type: ErrorType.VALIDATION,
-        code: ErrorCode.PARAMETER_INVALID,
+        type: FeatherErrorType.VALIDATION,
+        code: FeatherErrorCode.PARAMETER_INVALID,
         message: `expected param 'data' to be of type 'object'`
       });
     }
@@ -103,8 +107,8 @@ const utils = {
       if (!value) {
         if (expectation.isRequired) {
           throw new FeatherError({
-            type: ErrorType.VALIDATION,
-            code: ErrorCode.PARAMETER_MISSING,
+            type: FeatherErrorType.VALIDATION,
+            code: FeatherErrorCode.PARAMETER_MISSING,
             message: `required param not provided: '${key}'`
           });
         } else {
@@ -114,8 +118,8 @@ const utils = {
 
       if (typeof value !== expectation.type) {
         throw new FeatherError({
-          type: ErrorType.VALIDATION,
-          code: ErrorCode.PARAMETER_INVALID,
+          type: FeatherErrorType.VALIDATION,
+          code: FeatherErrorCode.PARAMETER_INVALID,
           message: `expected param '${key}' to be of type '${expectation.type}'`
         });
       }

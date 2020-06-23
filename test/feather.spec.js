@@ -1,6 +1,6 @@
 const testUtils = require("../testUtils");
-const utils = require("../lib/client/utils.js");
-const { Feather } = require("../lib/client/feather");
+const utils = require("../src/client/utils.js");
+const { Feather } = require("../src/client/feather");
 const feather = Feather(testUtils.getFeatherApiKey(), {
   protocol: "http",
   host: "localhost",

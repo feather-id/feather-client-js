@@ -2,7 +2,7 @@
   "name": "feather-client-js",
   "version": "0.0.3",
   "description": "Javascript library for the Feather API",
-  "main": "lib/client/feather.js",
+  "main": "src/client/feather.js",
   "scripts": {
     "test": "./node_modules/.bin/mocha --reporter spec 'test/**/*.spec.js'",
     "cover": "./node_modules/.bin/nyc --reporter=lcov --reporter=text ./node_modules/.bin/mocha 'test/**/*.spec.js' --all --timeout 30000 --exit",

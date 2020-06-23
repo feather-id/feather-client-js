@@ -1,6 +1,10 @@
 const utils = require("../utils");
 const parseToken = require("../parseToken");
-const { FeatherError, ErrorType, ErrorCode } = require("../../errors");
+const {
+  FeatherError,
+  FeatherErrorType,
+  FeatherErrorCode
+} = require("../../errors");
 
 const sessions = {
   _gateway: null,
@@ -50,8 +54,8 @@ const sessions = {
       if (typeof id !== "string") {
         reject(
           new FeatherError({
-            type: ErrorType.VALIDATION,
-            code: ErrorCode.PARAMETER_INVALID,
+            type: FeatherErrorType.VALIDATION,
+            code: FeatherErrorCode.PARAMETER_INVALID,
             message: `expected param 'id' to be of type 'string'`
           })
         );
@@ -80,8 +84,8 @@ const sessions = {
       if (typeof id !== "string") {
         reject(
           new FeatherError({
-            type: ErrorType.VALIDATION,
-            code: ErrorCode.PARAMETER_INVALID,
+            type: FeatherErrorType.VALIDATION,
+            code: FeatherErrorCode.PARAMETER_INVALID,
             message: `expected param 'id' to be of type 'string'`
           })
         );
@@ -124,8 +128,8 @@ const sessions = {
       if (typeof id !== "string") {
         reject(
           new FeatherError({
-            type: ErrorType.VALIDATION,
-            code: ErrorCode.PARAMETER_INVALID,
+            type: FeatherErrorType.VALIDATION,
+            code: FeatherErrorCode.PARAMETER_INVALID,
             message: `expected param 'id' to be of type 'string'`
           })
         );

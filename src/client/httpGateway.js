@@ -1,7 +1,11 @@
 const querystring = require("querystring");
 const utils = require("./utils");
 const fetch = require("node-fetch");
-const { FeatherError, ErrorType, ErrorCode } = require("../errors");
+const {
+  FeatherError,
+  FeatherErrorType,
+  FeatherErrorCode
+} = require("../errors");
 
 const DEFAULT_PROTOCOL = "https";
 const DEFAULT_HOST = "api.feather.id";

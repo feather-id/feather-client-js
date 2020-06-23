@@ -1,4 +1,4 @@
-const ErrorType = {
+const FeatherErrorType = {
   API: "api_error",
   API_CONNECTION: "api_connection_error",
   API_AUTHENTICATION: "api_authentication_error",
@@ -7,4 +7,4 @@ const ErrorType = {
   VALIDATION: "validation_error"
 };
 
-module.exports = ErrorType;
+module.exports = FeatherErrorType;

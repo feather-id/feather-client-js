@@ -1,11 +1,15 @@
 const jws = require("jws");
-const { FeatherError, ErrorType, ErrorCode } = require("../errors");
+const {
+  FeatherError,
+  FeatherErrorType,
+  FeatherErrorCode
+} = require("../errors");
 
 function parseToken(tokenString, getPublicKey) {
   return new Promise(function(resolve, reject) {
     const invalidTokenError = new FeatherError({
-      type: ErrorType.VALIDATION,
-      code: ErrorCode.SESSION_TOKEN_INVALID,
+      type: FeatherErrorType.VALIDATION,
+      code: FeatherErrorCode.SESSION_TOKEN_INVALID,
       message: "The session token is invalid"
     });
 
