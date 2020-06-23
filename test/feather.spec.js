@@ -1,9 +1,9 @@
 "use strict";
 
 const testUtils = require("../testUtils");
-const utils = require("../lib/utils.js");
-const Feather = require("../lib/feather");
-const feather = require("../lib/feather")(testUtils.getFeatherApiKey(), {
+const utils = require("../lib/client/utils.js");
+const Feather = require("../lib/client/feather");
+const feather = require("../lib/client/feather")(testUtils.getFeatherApiKey(), {
   protocol: "http",
   host: "localhost",
   port: "8080"
@@ -356,13 +356,6 @@ const sampleSessionRevoked = {
   revoked_at: "2020-01-01T16:40:40.61536699Z"
 };
 
-const sampleSessionList = {
-  object: "list",
-  has_more: false,
-  url: "/v1/sessions",
-  data: [sampleSession, sampleSessionRevoked]
-};
-
 describe("feather.sessions.create", function() {
   beforeEach(function() {
     nock.disableNetConnect();
@@ -430,63 +423,6 @@ describe("feather.sessions.create", function() {
       .replyWithError("boom");
     const data = { credentialToken: null };
     return expect(feather.sessions.create(data)).to.be.rejectedWith("boom");
-  });
-});
-
-describe("feather.sessions.list", function() {
-  beforeEach(function() {
-    nock.disableNetConnect();
-  });
-
-  afterEach(function() {
-    nock.cleanAll();
-    nock.enableNetConnect();
-  });
-
-  it("should reject invalid input", function() {
-    var data = { userId: 123 };
-    expect(feather.sessions.list(data)).to.be.rejectedWith(
-      `expected param 'userId' to be of type 'string'`
-    );
-
-    var data = { userId: true };
-    expect(feather.sessions.list(data)).to.be.rejectedWith(
-      `expected param 'userId' to be of type 'string'`
-    );
-
-    var data = { userId: {} };
-    expect(feather.sessions.list(data)).to.be.rejectedWith(
-      `expected param 'userId' to be of type 'string'`
-    );
-
-    var data = { userId: null };
-    expect(feather.sessions.list(data)).to.be.rejectedWith(
-      `required param not provided: 'userId'`
-    );
-  });
-
-  it("should list sessions", function() {
-    const scope = nock("http://localhost:8080", {
-      reqHeaders: {
-        Authorization: "Basic dGVzdF9sYUNaR1lmYURSZU5td2tsWnNmSXJUc0ZhNW5WaDk6",
-        "Content-Type": "application/x-www-form-urlencoded"
-      }
-    })
-      .get("/v1/sessions?user_id=foo", {})
-      .times(1)
-      .reply(200, sampleSessionList);
-    const data = { userId: "foo" };
-    return expect(feather.sessions.list(data)).to.eventually.deep.equal(
-      utils.snakeToCamelCase(sampleSessionList)
-    );
-  });
-
-  it("should reject a gateway error", function() {
-    const scope = nock("http://localhost:8080")
-      .get("/v1/sessions?user_id=foo")
-      .replyWithError("boom");
-    const data = { userId: "foo" };
-    return expect(feather.sessions.list(data)).to.be.rejectedWith("boom");
   });
 });
 
@@ -877,65 +813,6 @@ const sampleUserAuthenticated = {
   updated_at: "2020-05-13T19:41:45.566791Z"
 };
 
-const sampleUsersList = {
-  object: "list",
-  has_more: false,
-  url: "/foo",
-  data: [sampleUserAnonymous, sampleUserAuthenticated]
-};
-
-describe("feather.users.list", function() {
-  beforeEach(function() {
-    nock.disableNetConnect();
-  });
-
-  afterEach(function() {
-    nock.cleanAll();
-    nock.enableNetConnect();
-  });
-
-  it("should reject invalid input", function() {
-    var data = { limit: "foo" };
-    expect(feather.users.list(data)).to.be.rejectedWith(
-      `expected param 'limit' to be of type 'number'`
-    );
-
-    var data = { limit: true };
-    expect(feather.users.list(data)).to.be.rejectedWith(
-      `expected param 'limit' to be of type 'number'`
-    );
-
-    var data = { limit: {} };
-    expect(feather.users.list(data)).to.be.rejectedWith(
-      `expected param 'limit' to be of type 'number'`
-    );
-  });
-
-  it("should list users", function() {
-    const scope = nock("http://localhost:8080", {
-      reqHeaders: {
-        Authorization: "Basic dGVzdF9sYUNaR1lmYURSZU5td2tsWnNmSXJUc0ZhNW5WaDk6",
-        "Content-Type": "application/x-www-form-urlencoded"
-      }
-    })
-      .get("/v1/users?limit=123", {})
-      .times(1)
-      .reply(200, sampleUsersList);
-    const data = { limit: 123 };
-    return expect(feather.users.list(data)).to.eventually.deep.equal(
-      utils.snakeToCamelCase(sampleUsersList)
-    );
-  });
-
-  it("should reject a gateway error", function() {
-    const scope = nock("http://localhost:8080")
-      .get("/v1/users?limit=123", {})
-      .replyWithError("boom");
-    const data = { limit: 123 };
-    return expect(feather.users.list(data)).to.be.rejectedWith("boom");
-  });
-});
-
 describe("feather.users.retrieve", function() {
   beforeEach(function() {
     nock.disableNetConnect();
@@ -1223,7 +1100,7 @@ describe("feather._gateway", function() {
       .get("/v1/users/USR_foo", {})
       .reply(200, "!@#$%^");
     return expect(feather.users.retrieve("USR_foo")).to.be.rejectedWith(
-      "The gateway received an unparsable response with status code 200"
+      "invalid json response body at http://localhost:8080/v1/users/USR_foo reason: Unexpected token ! in JSON at position 0"
     );
   });
 });

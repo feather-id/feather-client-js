@@ -2,7 +2,7 @@
   "name": "feather-client-js",
   "version": "0.1.16",
   "description": "Javascript library for the Feather API",
-  "main": "lib/feather.js",
+  "main": "lib/client/feather.js",
   "scripts": {
     "test": "./node_modules/.bin/mocha --reporter spec 'test/**/*.spec.js'",
     "cover": "./node_modules/.bin/nyc --reporter=lcov --reporter=text ./node_modules/.bin/mocha 'test/**/*.spec.js' --all --timeout 30000 --exit",
@@ -37,6 +37,7 @@
   },
   "dependencies": {
     "chai-as-promised": "^7.1.1",
-    "jws": "^4.0.0"
+    "jws": "^4.0.0",
+    "node-fetch": "^2.6.0"
   }
 }
