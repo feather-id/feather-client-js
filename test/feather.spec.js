@@ -1,9 +1,7 @@
-"use strict";
-
 const testUtils = require("../testUtils");
 const utils = require("../lib/client/utils.js");
-const Feather = require("../lib/client/feather");
-const feather = require("../lib/client/feather")(testUtils.getFeatherApiKey(), {
+const { Feather } = require("../lib/client/feather");
+const feather = Feather(testUtils.getFeatherApiKey(), {
   protocol: "http",
   host: "localhost",
   port: "8080"
@@ -135,19 +133,6 @@ describe("feather.credentials.create", function() {
 
   it("should reject invalid input", function() {
     var data = { type: 123 };
-    expect(feather.credentials.create(data)).to.be.rejectedWith(
-      `expected param 'type' to be of type 'string'`
-    );
-
-    var data = { type: true };
-    expect(feather.credentials.create(data)).to.be.rejectedWith(
-      `expected param 'type' to be of type 'string'`
-    );
-
-    var data = { type: {} };
-    expect(feather.credentials.create(data)).to.be.rejectedWith(
-      `expected param 'type' to be of type 'string'`
-    );
 
     var data = {
       type: "email|password",
@@ -174,33 +159,6 @@ describe("feather.credentials.create", function() {
     };
     expect(feather.credentials.create(data)).to.be.rejectedWith(
       `expected param 'email' to be of type 'string'`
-    );
-
-    var data = {
-      type: "username|password",
-      username: 123,
-      password: "p4ssw0rd"
-    };
-    expect(feather.credentials.create(data)).to.be.rejectedWith(
-      `expected param 'username' to be of type 'string'`
-    );
-
-    var data = {
-      type: "username|password",
-      username: true,
-      password: "p4ssw0rd"
-    };
-    expect(feather.credentials.create(data)).to.be.rejectedWith(
-      `expected param 'username' to be of type 'string'`
-    );
-
-    var data = {
-      type: "username|password",
-      username: {},
-      password: "p4ssw0rd"
-    };
-    expect(feather.credentials.create(data)).to.be.rejectedWith(
-      `expected param 'username' to be of type 'string'`
     );
 
     var data = {
@@ -240,14 +198,14 @@ describe("feather.credentials.create", function() {
     })
       .post(
         "/v1/credentials",
-        "type=username%7Cpassword&username=foo&password=bar"
+        "email=foo%40test.com&password=bar&scopes=upgrade_session"
       )
       .times(1)
       .reply(200, sampleCredentialValid);
     const data = {
-      type: "username|password",
-      username: "foo",
-      password: "bar"
+      email: "foo@test.com",
+      password: "bar",
+      scopes: "upgrade_session"
     };
     return expect(feather.credentials.create(data)).to.eventually.deep.equal(
       utils.snakeToCamelCase(sampleCredentialValid)
@@ -259,9 +217,9 @@ describe("feather.credentials.create", function() {
       .post("/v1/credentials")
       .replyWithError("boom");
     const data = {
-      type: "username|password",
-      username: "foo",
-      password: "bar"
+      email: "foo@test.com",
+      password: "bar",
+      scopes: "upgrade_session"
     };
     return expect(feather.credentials.create(data)).to.be.rejectedWith("boom");
   });

@@ -17,7 +17,7 @@ $ yarn add @feather-id/feather-client-js
 The Feather package must be initialized with your project's API key, available on the [Feather Dashboard](https://feather.id/dashboard). Include the API key when you require the package:
 
 ```js
-import {Feather} from "@feather-id/feather-client-js");
+import {Feather} from "feather-client-js");
 const feather = Feather("pk_test_tZwHa2NRqGLt1A8qqhbdA8u7XcINW17A")
 ```
 
