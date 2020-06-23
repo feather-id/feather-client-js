@@ -1,5 +1,5 @@
 {
-  "name": "@feather-id/feather-client-js",
+  "name": "feather-client-js",
   "version": "0.0.2",
   "description": "Javascript library for the Feather API",
   "main": "lib/client/feather.js",
