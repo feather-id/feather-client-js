@@ -2,7 +2,7 @@ const {
   FeatherError,
   FeatherErrorType,
   FeatherErrorCode
-} = require("feather-client-js");
+} = require("../errors");
 const { fetchCurrentState, updateCurrentState } = require("./database");
 
 module.exports = function updateUserEmail(password, newEmail) {

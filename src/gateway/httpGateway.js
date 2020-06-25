@@ -36,6 +36,10 @@ function handleApiResult(res, resolve, reject) {
 
 HttpGateway.prototype = {
   sendRequest(method, path, data, headers) {
+    console.log(
+      `[${method}] ${path} ${JSON.stringify(data)} ${JSON.stringify(headers)}`
+    );
+
     const that = this;
     return new Promise(function(resolve, reject) {
       // Build request data

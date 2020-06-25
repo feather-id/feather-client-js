@@ -2,7 +2,7 @@ const {
   FeatherError,
   FeatherErrorType,
   FeatherErrorCode
-} = require("feather-client-js");
+} = require("../errors");
 const { fetchCurrentState, updateCurrentState } = require("./database");
 
 // TODO Update user with provided (optional) metadata after sign-in
