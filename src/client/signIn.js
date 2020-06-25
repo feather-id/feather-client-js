@@ -46,8 +46,6 @@ module.exports = function signIn(email, password) {
         }
       })
       .then(session => {
-        console.log("session");
-        console.log(session);
         that._gateway.setXFeatherSessionHeader(session.token);
         return Promise.all([
           session,
