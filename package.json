@@ -1,6 +1,6 @@
 {
   "name": "feather-client-js",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Javascript library for the Feather API",
   "main": "src/client/feather.js",
   "scripts": {
