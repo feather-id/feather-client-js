@@ -23,12 +23,13 @@ module.exports = function signInAnonymously() {
           return that._gateway.sessions.create();
         }
       })
-      .then(session =>
+      .then(session => {
+        that._gateway.setXFeatherSessionHeader(session.token);
         Promise.all([
           session,
           that._gateway.users.retrieve(session.userId, session.token)
-        ])
-      )
+        ]);
+      })
       .then(([session, user]) =>
         updateCurrentState({ session, user, credential: null })
       )

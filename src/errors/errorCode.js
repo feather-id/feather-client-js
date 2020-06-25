@@ -3,7 +3,6 @@ const FeatherErrorCode = {
   API_KEY_MISSING: "api_key_missing",
   API_KEY_INVALID: "api_key_invalid",
   CREDENTIAL_ALREADY_USED: "credential_already_used",
-  CREDENTIAL_SCOPES_INSUFFICIENT: "credential_scopes_insufficient",
   CREDENTIAL_INVALID: "credential_invalid",
   CURRENT_STATE_INCONSISTENT: "current_state_inconsistent",
   HEADER_EMPTY: "header_empty",

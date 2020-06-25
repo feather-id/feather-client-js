@@ -26,6 +26,7 @@ module.exports = function signOut(params) {
         }
       })
       .then((state, session) => {
+        that._gateway.setXFeatherSessionHeader(session.token);
         state.session = session;
         return updateCurrentState(state);
       })

@@ -44,19 +44,20 @@ module.exports = function confirmSignInLink(url) {
         }
         const credentialToken = credential.token;
         if (session) {
-          return that._gateway.sessions.upgrade(session.id, {
+          return that._gateway.sessions.update(session.id, {
             credentialToken
           });
         } else {
           return that._gateway.sessions.create({ credentialToken });
         }
       })
-      .then(session =>
-        Promise.all([
+      .then(session => {
+        that._gateway.setXFeatherSessionHeader(session.token);
+        return Promise.all([
           session,
           that._gateway.users.retrieve(session.userId, session.token)
-        ])
-      )
+        ]);
+      })
       .then(([session, user]) =>
         updateCurrentState({ session, user, credential: null })
       )
