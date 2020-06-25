@@ -853,34 +853,6 @@ describe("feather.users.update", function() {
       `expected param 'id' to be of type 'string'`
     );
 
-    var data = { username: true };
-    expect(feather.users.update("USR_foo", data)).to.be.rejectedWith(
-      `expected param 'username' to be of type 'string'`
-    );
-
-    var data = { username: 123 };
-    expect(feather.users.update("USR_foo", data)).to.be.rejectedWith(
-      `expected param 'username' to be of type 'string'`
-    );
-
-    var data = { username: {} };
-    expect(feather.users.update("USR_foo", data)).to.be.rejectedWith(
-      `expected param 'username' to be of type 'string'`
-    );
-
-    var data = { email: true };
-    expect(feather.users.update("USR_foo", data)).to.be.rejectedWith(
-      `expected param 'email' to be of type 'string'`
-    );
-    var data = { email: 123 };
-    expect(feather.users.update("USR_foo", data)).to.be.rejectedWith(
-      `expected param 'email' to be of type 'string'`
-    );
-    var data = { email: {} };
-    expect(feather.users.update("USR_foo", data)).to.be.rejectedWith(
-      `expected param 'email' to be of type 'string'`
-    );
-
     var data = { metadata: true };
     expect(feather.users.update("USR_foo", data)).to.be.rejectedWith(
       `expected param 'metadata' to be of type 'object'`
@@ -902,15 +874,10 @@ describe("feather.users.update", function() {
         "Content-Type": "application/x-www-form-urlencoded"
       }
     })
-      .post(
-        "/v1/users/USR_foo",
-        "username=foo&email=foo%40bar.com&metadata%5BhighScore%5D=101"
-      )
+      .post("/v1/users/USR_foo", "metadata%5BhighScore%5D=101")
       .times(1)
       .reply(200, sampleUserAuthenticated);
     const data = {
-      username: "foo",
-      email: "foo@bar.com",
       metadata: { highScore: 101 }
     };
     return expect(
@@ -930,6 +897,114 @@ describe("feather.users.update", function() {
     return expect(feather.users.update("USR_foo", data)).to.be.rejectedWith(
       "boom"
     );
+  });
+});
+
+describe("feather.users.updateEmail", function() {
+  beforeEach(function() {
+    nock.disableNetConnect();
+  });
+
+  afterEach(function() {
+    nock.cleanAll();
+    nock.enableNetConnect();
+  });
+
+  it("should reject invalid input", function() {
+    var data = {};
+    expect(feather.users.updateEmail(true, data)).to.be.rejectedWith(
+      `expected param 'id' to be of type 'string'`
+    );
+
+    var data = {};
+    expect(feather.users.updateEmail(123, data)).to.be.rejectedWith(
+      `expected param 'id' to be of type 'string'`
+    );
+
+    var data = {};
+    expect(feather.users.updateEmail({}, data)).to.be.rejectedWith(
+      `expected param 'id' to be of type 'string'`
+    );
+
+    var data = {};
+    expect(feather.users.updateEmail(null, data)).to.be.rejectedWith(
+      `expected param 'id' to be of type 'string'`
+    );
+
+    var data = { newEmail: "foo@bar.com" };
+    expect(feather.users.updateEmail("USR_foo", data)).to.be.rejectedWith(
+      `required param not provided: 'credentialToken'`
+    );
+
+    var data = { credentialToken: 123, newEmail: "foo@bar.com" };
+    expect(feather.users.updateEmail("USR_foo", data)).to.be.rejectedWith(
+      `expected param 'credentialToken' to be of type 'string'`
+    );
+
+    var data = { credentialToken: {}, newEmail: "foo@bar.com" };
+    expect(feather.users.updateEmail("USR_foo", data)).to.be.rejectedWith(
+      `expected param 'credentialToken' to be of type 'string'`
+    );
+
+    var data = { credentialToken: 123, newEmail: "n3w p4ssw0rd" };
+    expect(feather.users.updateEmail("USR_foo", data)).to.be.rejectedWith(
+      `expected param 'credentialToken' to be of type 'string'`
+    );
+
+    var data = { credentialToken: "foo" };
+    expect(feather.users.updateEmail("USR_foo", data)).to.be.rejectedWith(
+      `required param not provided: 'newEmail'`
+    );
+
+    var data = { credentialToken: "foo", newEmail: true };
+    expect(feather.users.updateEmail("USR_foo", data)).to.be.rejectedWith(
+      `expected param 'newEmail' to be of type 'string'`
+    );
+
+    var data = { credentialToken: "foo", newEmail: 123 };
+    expect(feather.users.updateEmail("USR_foo", data)).to.be.rejectedWith(
+      `expected param 'newEmail' to be of type 'string'`
+    );
+
+    var data = { credentialToken: "foo", newEmail: {} };
+    expect(feather.users.updateEmail("USR_foo", data)).to.be.rejectedWith(
+      `expected param 'newEmail' to be of type 'string'`
+    );
+  });
+
+  it("should update a user's email", function() {
+    const scope = nock("http://localhost:8080", {
+      reqHeaders: {
+        Authorization: "Basic dGVzdF9sYUNaR1lmYURSZU5td2tsWnNmSXJUc0ZhNW5WaDk6",
+        "Content-Type": "application/x-www-form-urlencoded"
+      }
+    })
+      .post(
+        "/v1/users/USR_foo/email",
+        "credential_token=foo&new_email=foo%40bar.com"
+      )
+      .times(1)
+      .reply(200, sampleUserAuthenticated);
+    const data = {
+      credentialToken: "foo",
+      newEmail: "foo@bar.com"
+    };
+    return expect(
+      feather.users.updateEmail("USR_foo", data)
+    ).to.eventually.deep.equal(utils.snakeToCamelCase(sampleUserAuthenticated));
+  });
+
+  it("should reject a gateway error", function() {
+    const scope = nock("http://localhost:8080")
+      .post("/v1/users/USR_foo/email")
+      .replyWithError("boom");
+    const data = {
+      credentialToken: "foo",
+      newEmail: "foo@bar.com"
+    };
+    return expect(
+      feather.users.updateEmail("USR_foo", data)
+    ).to.be.rejectedWith("boom");
   });
 });
 
