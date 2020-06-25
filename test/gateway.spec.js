@@ -1,7 +1,7 @@
-const testUtils = require("../testUtils");
-const utils = require("../src/client/utils.js");
-const { Feather } = require("../src/client/feather");
-const feather = Feather(testUtils.getFeatherApiKey(), {
+const testUtils = require("./testUtils.js");
+const utils = require("../src/gateway/utils.js");
+const { Gateway } = require("../src/gateway");
+const feather = Gateway(testUtils.getFeatherApiKey(), {
   protocol: "http",
   host: "localhost",
   port: "8080"
@@ -18,51 +18,51 @@ const expect = chai.expect;
 describe("feather constructor", function() {
   it("should only accept an api key of type string", function() {
     expect(() => {
-      Feather(true);
+      Gateway(true);
     }).to.throw(`expected 'apiKey' to be of type 'string'`);
 
     expect(() => {
-      Feather(123);
+      Gateway(123);
     }).to.throw(`expected 'apiKey' to be of type 'string'`);
 
     expect(() => {
-      Feather({});
+      Gateway({});
     }).to.throw(`expected 'apiKey' to be of type 'string'`);
 
     expect(() => {
-      Feather(null);
+      Gateway(null);
     }).to.throw(`expected 'apiKey' to be of type 'string'`);
 
     expect(() => {
-      Feather("test_123");
+      Gateway("test_123");
     }).to.not.throw();
   });
 
   it("should throw error if config is not an object", () => {
     expect(() => {
-      Feather(testUtils.getFeatherApiKey(), true);
+      Gateway(testUtils.getFeatherApiKey(), true);
     }).to.throw(`expected 'config' to be of type 'object'`);
 
     expect(() => {
-      Feather(testUtils.getFeatherApiKey(), 123);
+      Gateway(testUtils.getFeatherApiKey(), 123);
     }).to.throw(`expected 'config' to be of type 'object'`);
 
     expect(() => {
-      Feather(testUtils.getFeatherApiKey(), "test_123");
+      Gateway(testUtils.getFeatherApiKey(), "test_123");
     }).to.throw(`expected 'config' to be of type 'object'`);
 
     expect(() => {
-      Feather(testUtils.getFeatherApiKey(), null);
+      Gateway(testUtils.getFeatherApiKey(), null);
     }).to.not.throw();
 
     expect(() => {
-      Feather(testUtils.getFeatherApiKey(), {});
+      Gateway(testUtils.getFeatherApiKey(), {});
     }).to.not.throw();
   });
 
   it("should only accept a config with allowed properties", () => {
     expect(() => {
-      Feather(testUtils.getFeatherApiKey(), {
+      Gateway(testUtils.getFeatherApiKey(), {
         foo: "bar",
         baz: "qux"
       });
@@ -71,7 +71,7 @@ describe("feather constructor", function() {
     );
 
     expect(() => {
-      Feather(testUtils.getFeatherApiKey(), {
+      Gateway(testUtils.getFeatherApiKey(), {
         host: "foo.feather.id",
         port: 321
       });
@@ -80,22 +80,16 @@ describe("feather constructor", function() {
 
   it("should only accept a valid protocol", () => {
     expect(() => {
-      Feather(testUtils.getFeatherApiKey(), {
+      Gateway(testUtils.getFeatherApiKey(), {
         protocol: "foo"
       });
     }).to.throw(`expected 'protocol' to be one of either: 'http' or 'https'`);
 
     expect(() => {
-      Feather(testUtils.getFeatherApiKey(), {
+      Gateway(testUtils.getFeatherApiKey(), {
         protocol: "http"
       });
     }).to.not.throw();
-  });
-
-  it("should create a gateway", () => {
-    expect(() => {
-      return Feather(testUtils.getFeatherApiKey(), {})._gateway;
-    }).to.not.be.null;
   });
 });
 

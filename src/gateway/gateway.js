@@ -10,9 +10,9 @@ const {
 const ALLOWED_PROTOCOLS = ["https", "http"];
 const ALLOWED_CONFIG_PROPERTIES = ["protocol", "host", "port", "basePath"];
 
-function Feather(apiKey, config = {}) {
-  if (!(this instanceof Feather)) {
-    return new Feather(apiKey, config);
+function Gateway(apiKey, config = {}) {
+  if (!(this instanceof Gateway)) {
+    return new Gateway(apiKey, config);
   }
 
   // Validate inputs
@@ -31,12 +31,10 @@ function Feather(apiKey, config = {}) {
   return this;
 }
 
-Feather.prototype = {
+Gateway.prototype = {
   /**
-   * @public
-   * In addition to your client API key, some operations available in this SDK require a valid session token to be provided in the 'x-feather-session' header.
-   * This convenience method provides a way to automatically set the 'x-feather-session' header where it's required.
-   * For more information, please see our API reference documentation at https://feather.id/docs/api
+   * @private
+   * This may be removed in the future
    */
   setXFeatherSessionHeader(sessionToken) {
     this.sessions._xFeatherSession = sessionToken;
@@ -101,6 +99,6 @@ Feather.prototype = {
   }
 };
 
-module.exports = { Feather, FeatherError, FeatherErrorType, FeatherErrorCode };
-module.exports.Feather = Feather;
-module.exports.default = Feather;
+module.exports = { Gateway, FeatherError, FeatherErrorType, FeatherErrorCode };
+module.exports.Gateway = Gateway;
+module.exports.default = Gateway;
