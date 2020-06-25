@@ -9,6 +9,7 @@ const {
 const sessions = {
   _gateway: null,
   _parseToken: parseToken,
+  _xFeatherSession: null,
   _cachedPublicKeys: {},
 
   /**
@@ -61,11 +62,21 @@ const sessions = {
         );
         return;
       }
+      if (!that._xFeatherSession) {
+        reject(
+          new FeatherError({
+            type: FeatherErrorType.VALIDATION,
+            code: FeatherErrorCode.HEADER_MISSING,
+            message: `This method requires an 'x-feather-session' header. Please use the 'setXFeatherSessionHeader' convenience method to provide valid session token for authorizing this request.`
+          })
+        );
+      }
+      const headers = { "x-feather-session": that._xFeatherSession };
 
       // Send request
       const path = "/sessions/" + id;
       that._httpGateway
-        .sendRequest("GET", path, null)
+        .sendRequest("GET", path, null, headers)
         .then(res => resolve(res))
         .catch(err => reject(err));
     });
@@ -74,13 +85,11 @@ const sessions = {
   /**
    * Revokes a session
    * @arg id
-   * @arg { sessionToken }
    * @return session
    */
-  revoke: function(id, data) {
+  revoke: function(id) {
     const that = this;
     return new Promise(function(resolve, reject) {
-      // Validate input
       if (typeof id !== "string") {
         reject(
           new FeatherError({
@@ -91,37 +100,33 @@ const sessions = {
         );
         return;
       }
-      try {
-        utils.validateData(data, {
-          isRequired: true,
-          params: {
-            sessionToken: {
-              type: "string",
-              isRequired: true
-            }
-          }
-        });
-      } catch (error) {
-        reject(error);
-        return;
+      if (!that._xFeatherSession) {
+        reject(
+          new FeatherError({
+            type: FeatherErrorType.VALIDATION,
+            code: FeatherErrorCode.HEADER_MISSING,
+            message: `This method requires an 'x-feather-session' header. Please use the 'setXFeatherSessionHeader' convenience method to provide valid session token for authorizing this request.`
+          })
+        );
       }
+      const headers = { "x-feather-session": that._xFeatherSession };
 
       // Send request
       const path = "/sessions/" + id + "/revoke";
       that._httpGateway
-        .sendRequest("POST", path, data)
+        .sendRequest("POST", path, null, headers)
         .then(res => resolve(res))
         .catch(err => reject(err));
     });
   },
 
   /**
-   * Upgrades a session
+   * Updates a session
    * @arg id
    * @arg { credentialToken }
    * @return session
    */
-  upgrade: function(id, data) {
+  update: function(id, data) {
     const that = this;
     return new Promise(function(resolve, reject) {
       // Validate input
@@ -149,11 +154,21 @@ const sessions = {
         reject(error);
         return;
       }
+      if (!that._xFeatherSession) {
+        reject(
+          new FeatherError({
+            type: FeatherErrorType.VALIDATION,
+            code: FeatherErrorCode.HEADER_MISSING,
+            message: `This method requires an 'x-feather-session' header. Please use the 'setXFeatherSessionHeader' convenience method to provide valid session token for authorizing this request.`
+          })
+        );
+      }
+      const headers = { "x-feather-session": that._xFeatherSession };
 
       // Send request
-      const path = "/sessions/" + id + "/upgrade";
+      const path = "/sessions/" + id;
       that._httpGateway
-        .sendRequest("POST", path, data)
+        .sendRequest("POST", path, data, headers)
         .then(res => resolve(res))
         .catch(err => reject(err));
     });
@@ -161,10 +176,10 @@ const sessions = {
 
   /**
    * Validates a session token
-   * @arg { sessionToken }
+   * @arg sessionToken
    * @return session
    */
-  validate: function(data) {
+  validate: function(sessionToken) {
     const that = this;
 
     /**
@@ -196,38 +211,21 @@ const sessions = {
 
     return new Promise(function(resolve, reject) {
       // Validate input
-      try {
-        utils.validateData(data, {
-          isRequired: true,
-          params: {
-            sessionToken: {
-              type: "string",
-              isRequired: true
-            }
-          }
-        });
-      } catch (error) {
-        reject(error);
+      if (typeof sessionToken !== "string") {
+        reject(
+          new FeatherError({
+            type: FeatherErrorType.VALIDATION,
+            code: FeatherErrorCode.PARAMETER_INVALID,
+            message: `expected param 'sessionToken' to be of type 'string'`
+          })
+        );
         return;
       }
 
       // Parse token locally
       that
-        ._parseToken(data.sessionToken, getPublicKey)
-        .then(session => {
-          // If session is active, just resolve
-          if (session.status === "active") {
-            resolve(session);
-            return;
-          }
-
-          // Send request
-          const path = "/sessions/" + session.id + "/validate";
-          that._httpGateway
-            .sendRequest("POST", path, data)
-            .then(res => resolve(res))
-            .catch(err => reject(err));
-        })
+        ._parseToken(sessionToken, getPublicKey)
+        .then(session => resolve(session))
         .catch(err => reject(err));
     });
   }

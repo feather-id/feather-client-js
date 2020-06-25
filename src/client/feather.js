@@ -33,6 +33,17 @@ function Feather(apiKey, config = {}) {
 
 Feather.prototype = {
   /**
+   * @public
+   * In addition to your client API key, some operations available in this SDK require a valid session token to be provided in the 'x-feather-session' header.
+   * This convenience method provides a way to automatically set the 'x-feather-session' header where it's required.
+   * For more information, please see our API reference documentation at https://feather.id/docs/api
+   */
+  setXFeatherSessionHeader(sessionToken) {
+    this.sessions._xFeatherSession = sessionToken;
+    this.users._xFeatherSession = sessionToken;
+  },
+
+  /**
    * @private
    * This may be removed in the future.
    */

@@ -7,13 +7,14 @@ const {
 
 const users = {
   _gateway: null,
+  _xFeatherSession: null,
 
   /**
    * Retrieves a user
    * @arg id
    * @return user
    */
-  retrieve: function(id, sessionToken) {
+  retrieve: function(id) {
     const that = this;
     return new Promise(function(resolve, reject) {
       // Validate input
@@ -27,9 +28,18 @@ const users = {
         );
         return;
       }
+      if (!that._xFeatherSession) {
+        reject(
+          new FeatherError({
+            type: FeatherErrorType.VALIDATION,
+            code: FeatherErrorCode.HEADER_MISSING,
+            message: `This method requires an 'x-feather-session' header. Please use the 'setXFeatherSessionHeader' convenience method to provide valid session token for authorizing this request.`
+          })
+        );
+      }
+      const headers = { "x-feather-session": that._xFeatherSession };
 
       // Send request
-      const headers = { "x-feather-session": sessionToken };
       const path = "/users/" + id;
       that._httpGateway
         .sendRequest("GET", path, null, headers)
@@ -71,9 +81,20 @@ const users = {
         reject(error);
         return;
       }
+      if (!that._xFeatherSession) {
+        reject(
+          new FeatherError({
+            type: FeatherErrorType.VALIDATION,
+            code: FeatherErrorCode.HEADER_MISSING,
+            message: `This method requires an 'x-feather-session' header. Please use the 'setXFeatherSessionHeader' convenience method to provide valid session token for authorizing this request.`
+          })
+        );
+      }
+      const headers = { "x-feather-session": that._xFeatherSession };
 
+      // Send request
       that._httpGateway
-        .sendRequest("POST", "/users/" + id, data)
+        .sendRequest("POST", "/users/" + id, data, headers)
         .then(res => resolve(res))
         .catch(err => reject(err));
     });
@@ -117,10 +138,21 @@ const users = {
         reject(error);
         return;
       }
+      if (!that._xFeatherSession) {
+        reject(
+          new FeatherError({
+            type: FeatherErrorType.VALIDATION,
+            code: FeatherErrorCode.HEADER_MISSING,
+            message: `This method requires an 'x-feather-session' header. Please use the 'setXFeatherSessionHeader' convenience method to provide valid session token for authorizing this request.`
+          })
+        );
+      }
+      const headers = { "x-feather-session": that._xFeatherSession };
 
+      // Send request
       const path = "/users/" + id + "/email";
       that._httpGateway
-        .sendRequest("POST", path, data)
+        .sendRequest("POST", path, data, headers)
         .then(res => resolve(res))
         .catch(err => reject(err));
     });
@@ -164,10 +196,21 @@ const users = {
         reject(error);
         return;
       }
+      if (!that._xFeatherSession) {
+        reject(
+          new FeatherError({
+            type: FeatherErrorType.VALIDATION,
+            code: FeatherErrorCode.HEADER_MISSING,
+            message: `This method requires an 'x-feather-session' header. Please use the 'setXFeatherSessionHeader' convenience method to provide valid session token for authorizing this request.`
+          })
+        );
+      }
+      const headers = { "x-feather-session": that._xFeatherSession };
 
+      // Send request
       const path = "/users/" + id + "/password";
       that._httpGateway
-        .sendRequest("POST", path, data)
+        .sendRequest("POST", path, data, headers)
         .then(res => resolve(res))
         .catch(err => reject(err));
     });

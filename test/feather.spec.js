@@ -387,11 +387,13 @@ describe("feather.sessions.create", function() {
 describe("feather.sessions.retrieve", function() {
   beforeEach(function() {
     nock.disableNetConnect();
+    feather.setXFeatherSessionHeader("foo.session.token");
   });
 
   afterEach(function() {
     nock.cleanAll();
     nock.enableNetConnect();
+    feather.setXFeatherSessionHeader(null);
   });
 
   it("should reject invalid input", function() {
@@ -416,7 +418,8 @@ describe("feather.sessions.retrieve", function() {
     const scope = nock("http://localhost:8080", {
       reqHeaders: {
         Authorization: "Basic dGVzdF9sYUNaR1lmYURSZU5td2tsWnNmSXJUc0ZhNW5WaDk6",
-        "Content-Type": "application/x-www-form-urlencoded"
+        "Content-Type": "application/x-www-form-urlencoded",
+        "x-feather-session": "foo.session.token"
       }
     })
       .get("/v1/sessions/SES_foo", {})
@@ -440,44 +443,26 @@ describe("feather.sessions.retrieve", function() {
 describe("feather.sessions.revoke", function() {
   beforeEach(function() {
     nock.disableNetConnect();
+    feather.setXFeatherSessionHeader("foo.session.token");
   });
 
   afterEach(function() {
     nock.cleanAll();
     nock.enableNetConnect();
+    feather.setXFeatherSessionHeader(null);
   });
 
   it("should reject invalid input", function() {
-    expect(feather.sessions.revoke(123, "foo")).to.be.rejectedWith(
+    expect(feather.sessions.revoke(123)).to.be.rejectedWith(
       `expected param 'id' to be of type 'string'`
     );
 
-    expect(feather.sessions.revoke(true, "foo")).to.be.rejectedWith(
+    expect(feather.sessions.revoke(true)).to.be.rejectedWith(
       `expected param 'id' to be of type 'string'`
     );
 
-    expect(feather.sessions.revoke({}, "foo")).to.be.rejectedWith(
+    expect(feather.sessions.revoke({})).to.be.rejectedWith(
       `expected param 'id' to be of type 'string'`
-    );
-
-    var data = { sessionToken: 123 };
-    expect(feather.sessions.revoke("SES_foo", data)).to.be.rejectedWith(
-      `expected param 'sessionToken' to be of type 'string'`
-    );
-
-    var data = { sessionToken: true };
-    expect(feather.sessions.revoke("SES_foo", data)).to.be.rejectedWith(
-      `expected param 'sessionToken' to be of type 'string'`
-    );
-
-    var data = { sessionToken: {} };
-    expect(feather.sessions.revoke("SES_foo", data)).to.be.rejectedWith(
-      `expected param 'sessionToken' to be of type 'string'`
-    );
-
-    var data = { sessionToken: null };
-    expect(feather.sessions.revoke("SES_foo", data)).to.be.rejectedWith(
-      `required param not provided: 'sessionToken'`
     );
   });
 
@@ -485,103 +470,105 @@ describe("feather.sessions.revoke", function() {
     const scope = nock("http://localhost:8080", {
       reqHeaders: {
         Authorization: "Basic dGVzdF9sYUNaR1lmYURSZU5td2tsWnNmSXJUc0ZhNW5WaDk6",
-        "Content-Type": "application/x-www-form-urlencoded"
+        "Content-Type": "application/x-www-form-urlencoded",
+        "x-feather-session": "foo.session.token"
       }
     })
-      .post("/v1/sessions/SES_foo/revoke", "session_token=foo")
+      .post("/v1/sessions/SES_foo/revoke")
       .times(1)
       .reply(200, sampleSession);
-    const data = { sessionToken: "foo" };
-    return expect(
-      feather.sessions.revoke("SES_foo", data)
-    ).to.eventually.deep.equal(utils.snakeToCamelCase(sampleSession));
+    return expect(feather.sessions.revoke("SES_foo")).to.eventually.deep.equal(
+      utils.snakeToCamelCase(sampleSession)
+    );
   });
 
   it("should reject a gateway error", function() {
     const scope = nock("http://localhost:8080")
-      .post("/v1/sessions/SES_foo/revoke", "session_token=foo")
+      .post("/v1/sessions/SES_foo/revoke")
       .replyWithError("boom");
-    const data = { sessionToken: "foo" };
-    return expect(feather.sessions.revoke("SES_foo", data)).to.be.rejectedWith(
+    return expect(feather.sessions.revoke("SES_foo")).to.be.rejectedWith(
       "boom"
     );
   });
 });
 
-describe("feather.sessions.upgrade", function() {
+describe("feather.sessions.update", function() {
   beforeEach(function() {
     nock.disableNetConnect();
+    feather.setXFeatherSessionHeader("foo.session.token");
   });
 
   afterEach(function() {
     nock.cleanAll();
     nock.enableNetConnect();
+    feather.setXFeatherSessionHeader(null);
   });
 
   it("should reject invalid input", function() {
-    expect(feather.sessions.upgrade(123, "foo")).to.be.rejectedWith(
+    expect(feather.sessions.update(123, "foo")).to.be.rejectedWith(
       `expected param 'id' to be of type 'string'`
     );
 
-    expect(feather.sessions.upgrade(true, "foo")).to.be.rejectedWith(
+    expect(feather.sessions.update(true, "foo")).to.be.rejectedWith(
       `expected param 'id' to be of type 'string'`
     );
 
-    expect(feather.sessions.upgrade({}, "foo")).to.be.rejectedWith(
+    expect(feather.sessions.update({}, "foo")).to.be.rejectedWith(
       `expected param 'id' to be of type 'string'`
     );
 
     var data = { credentialToken: 123 };
-    expect(feather.sessions.upgrade("SES_foo", data)).to.be.rejectedWith(
+    expect(feather.sessions.update("SES_foo", data)).to.be.rejectedWith(
       `expected param 'credentialToken' to be of type 'string'`
     );
 
     var data = { credentialToken: true };
-    expect(feather.sessions.upgrade("SES_foo", data)).to.be.rejectedWith(
+    expect(feather.sessions.update("SES_foo", data)).to.be.rejectedWith(
       `expected param 'credentialToken' to be of type 'string'`
     );
 
     var data = { credentialToken: {} };
-    expect(feather.sessions.upgrade("SES_foo", data)).to.be.rejectedWith(
+    expect(feather.sessions.update("SES_foo", data)).to.be.rejectedWith(
       `expected param 'credentialToken' to be of type 'string'`
     );
 
     var data = { credentialToken: null };
-    expect(feather.sessions.upgrade("SES_foo", data)).to.be.rejectedWith(
+    expect(feather.sessions.update("SES_foo", data)).to.be.rejectedWith(
       `required param not provided: 'credentialToken'`
     );
 
-    expect(feather.sessions.upgrade("SES_foo", null)).to.be.rejectedWith(
+    expect(feather.sessions.update("SES_foo", null)).to.be.rejectedWith(
       `required request data not provided`
     );
 
-    expect(feather.sessions.upgrade("SES_foo", 123)).to.be.rejectedWith(
+    expect(feather.sessions.update("SES_foo", 123)).to.be.rejectedWith(
       `expected param 'data' to be of type 'object'`
     );
   });
 
-  it("should upgrade a session", function() {
+  it("should update a session", function() {
     const scope = nock("http://localhost:8080", {
       reqHeaders: {
         Authorization: "Basic dGVzdF9sYUNaR1lmYURSZU5td2tsWnNmSXJUc0ZhNW5WaDk6",
-        "Content-Type": "application/x-www-form-urlencoded"
+        "Content-Type": "application/x-www-form-urlencoded",
+        "x-feather-session": "foo.session.token"
       }
     })
-      .post("/v1/sessions/SES_foo/upgrade", "credential_token=foo")
+      .post("/v1/sessions/SES_foo", "credential_token=foo")
       .times(1)
       .reply(200, sampleSession);
     const data = { credentialToken: "foo" };
     return expect(
-      feather.sessions.upgrade("SES_foo", data)
+      feather.sessions.update("SES_foo", data)
     ).to.eventually.deep.equal(utils.snakeToCamelCase(sampleSession));
   });
 
   it("should reject a gateway error", function() {
     const scope = nock("http://localhost:8080")
-      .post("/v1/sessions/SES_foo/upgrade", "credential_token=foo")
+      .post("/v1/sessions/SES_foo", "credential_token=foo")
       .replyWithError("boom");
     const data = { credentialToken: "foo" };
-    return expect(feather.sessions.upgrade("SES_foo", data)).to.be.rejectedWith(
+    return expect(feather.sessions.update("SES_foo", data)).to.be.rejectedWith(
       "boom"
     );
   });
@@ -598,150 +585,107 @@ describe("feather.sessions.validate", function() {
   });
 
   it("should reject invalid input", function() {
-    var data = { sessionToken: "foo" };
-    expect(feather.sessions.validate(data)).to.be.rejectedWith(
+    expect(feather.sessions.validate("foo")).to.be.rejectedWith(
       "The session token is invalid"
     );
 
-    var data = { sessionToken: 123 };
-    expect(feather.sessions.validate(data)).to.be.rejectedWith(
+    expect(feather.sessions.validate(123)).to.be.rejectedWith(
       `expected param 'sessionToken' to be of type 'string'`
     );
 
-    var data = { sessionToken: true };
-    expect(feather.sessions.validate(data)).to.be.rejectedWith(
+    expect(feather.sessions.validate(true)).to.be.rejectedWith(
       `expected param 'sessionToken' to be of type 'string'`
     );
 
-    var data = { sessionToken: {} };
-    expect(feather.sessions.validate(data)).to.be.rejectedWith(
+    expect(feather.sessions.validate({})).to.be.rejectedWith(
       `expected param 'sessionToken' to be of type 'string'`
     );
 
-    var data = { sessionToken: null };
-    expect(feather.sessions.validate(data)).to.be.rejectedWith(
-      `required param not provided: 'sessionToken'`
+    expect(feather.sessions.validate(null)).to.be.rejectedWith(
+      `expected param 'sessionToken' to be of type 'string'`
     );
   });
 
   it("should reject a gateway error", function() {
+    const sessionToken = testUtils.getSampleSessionTokens()["validButStale"];
     const scope = nock("http://localhost:8080")
       .get("/v1/publicKeys/0")
       .replyWithError("boom");
-    const data = {
-      sessionToken: testUtils.getSampleSessionTokens()["validButStale"]
-    };
-    return expect(feather.sessions.validate(data)).to.be.rejectedWith("boom");
+    return expect(feather.sessions.validate(sessionToken)).to.be.rejectedWith(
+      "boom"
+    );
   });
 
-  it("should parse a valid token", function() {
+  it("should reject an expired token", function() {
     const sessionToken = testUtils.getSampleSessionTokens()["validButStale"];
-    const scope = testUtils
-      .getPublicKeyNock()
-      .post(
-        "/v1/sessions/SES_10836cb6-994d-40f6-950c-3617be17b7c3/validate",
-        "session_token=" + sessionToken
-      )
-      .times(1)
-      .reply(200, sampleSession);
-    const data = { sessionToken };
-    return feather.sessions.validate(data).then(res => {
-      expect(res).to.deep.equal(utils.snakeToCamelCase(sampleSession));
-      expect(scope.isDone()).to.equal(true);
-    });
+    const scope = testUtils.getPublicKeyNock();
+    return expect(feather.sessions.validate(sessionToken)).to.be.rejectedWith(
+      "The session token is expired"
+    );
   });
 
   it("should reject an invalid signature algorithm", function() {
+    const sessionToken = testUtils.getSampleSessionTokens()["invalidAlg"];
     const scope = testUtils.getPublicKeyNock();
-    const data = {
-      sessionToken: testUtils.getSampleSessionTokens()["invalidAlg"]
-    };
-    return expect(feather.sessions.validate(data)).to.be.rejectedWith(
+    return expect(feather.sessions.validate(sessionToken)).to.be.rejectedWith(
       "The session token is invalid"
     );
   });
 
   it("should reject an invalid signature", function() {
+    const sessionToken = testUtils.getSampleSessionTokens()["invalidSignature"];
     const scope = testUtils.getPublicKeyNock();
-    const data = {
-      sessionToken: testUtils.getSampleSessionTokens()["invalidSignature"]
-    };
-    return expect(feather.sessions.validate(data)).to.be.rejectedWith(
+    return expect(feather.sessions.validate(sessionToken)).to.be.rejectedWith(
       "The session token is invalid"
     );
   });
 
   it("should reject a modified token", function() {
+    const sessionToken = testUtils.getSampleSessionTokens()["modified"];
     const scope = testUtils.getPublicKeyNock();
-    const data = {
-      sessionToken: testUtils.getSampleSessionTokens()["modified"]
-    };
-    return expect(feather.sessions.validate(data)).to.be.rejectedWith(
+    return expect(feather.sessions.validate(sessionToken)).to.be.rejectedWith(
       "The session token is invalid"
     );
   });
 
   it("should reject a missing key id", function() {
+    const sessionToken = testUtils.getSampleSessionTokens()["missingKeyId"];
     const scope = testUtils.getPublicKeyNock();
-    const data = {
-      sessionToken: testUtils.getSampleSessionTokens()["missingKeyId"]
-    };
-    return expect(feather.sessions.validate(data)).to.be.rejectedWith(
+    return expect(feather.sessions.validate(sessionToken)).to.be.rejectedWith(
       "The session token is invalid"
     );
   });
 
   it("should reject an invalid issuer", function() {
+    const sessionToken = testUtils.getSampleSessionTokens()["invalidIssuer"];
     const scope = testUtils.getPublicKeyNock();
-    const data = {
-      sessionToken: testUtils.getSampleSessionTokens()["invalidIssuer"]
-    };
-    return expect(feather.sessions.validate(data)).to.be.rejectedWith(
+    return expect(feather.sessions.validate(sessionToken)).to.be.rejectedWith(
       "The session token is invalid"
     );
   });
 
   it("should reject an invalid subject", function() {
+    const sessionToken = testUtils.getSampleSessionTokens()["invalidSubject"];
     const scope = testUtils.getPublicKeyNock();
-    const data = {
-      sessionToken: testUtils.getSampleSessionTokens()["invalidSubject"]
-    };
-    return expect(feather.sessions.validate(data)).to.be.rejectedWith(
+    return expect(feather.sessions.validate(sessionToken)).to.be.rejectedWith(
       "The session token is invalid"
     );
   });
 
   it("should reject an invalid audience", function() {
+    const sessionToken = testUtils.getSampleSessionTokens()["invalidAudience"];
     const scope = testUtils.getPublicKeyNock();
-    const data = {
-      sessionToken: testUtils.getSampleSessionTokens()["invalidAudience"]
-    };
-    return expect(feather.sessions.validate(data)).to.be.rejectedWith(
+    return expect(feather.sessions.validate(sessionToken)).to.be.rejectedWith(
       "The session token is invalid"
     );
   });
 
   it("should reject an invalid session id", function() {
+    const sessionToken = testUtils.getSampleSessionTokens()["invalidSessionId"];
     const scope = testUtils.getPublicKeyNock();
-    const data = {
-      sessionToken: testUtils.getSampleSessionTokens()["invalidSessionId"]
-    };
-    return expect(feather.sessions.validate(data)).to.be.rejectedWith(
+    return expect(feather.sessions.validate(sessionToken)).to.be.rejectedWith(
       "The session token is invalid"
     );
-  });
-
-  it("should reject a gateway error", function() {
-    const sessionToken = testUtils.getSampleSessionTokens()["validButStale"];
-    const scope = testUtils
-      .getPublicKeyNock()
-      .post(
-        "/v1/sessions/SES_10836cb6-994d-40f6-950c-3617be17b7c3/validate",
-        "session_token=" + sessionToken
-      )
-      .replyWithError("boom");
-    const data = { sessionToken };
-    return expect(feather.sessions.validate(data)).to.be.rejectedWith("boom");
   });
 });
 
@@ -774,11 +718,13 @@ const sampleUserAuthenticated = {
 describe("feather.users.retrieve", function() {
   beforeEach(function() {
     nock.disableNetConnect();
+    feather.setXFeatherSessionHeader("foo.session.token");
   });
 
   afterEach(function() {
     nock.cleanAll();
     nock.enableNetConnect();
+    feather.setXFeatherSessionHeader(null);
   });
 
   it("should reject invalid input", function() {
@@ -803,7 +749,8 @@ describe("feather.users.retrieve", function() {
     const scope = nock("http://localhost:8080", {
       reqHeaders: {
         Authorization: "Basic dGVzdF9sYUNaR1lmYURSZU5td2tsWnNmSXJUc0ZhNW5WaDk6",
-        "Content-Type": "application/x-www-form-urlencoded"
+        "Content-Type": "application/x-www-form-urlencoded",
+        "x-feather-session": "foo.session.token"
       }
     })
       .get("/v1/users/USR_foo", {})
@@ -825,11 +772,13 @@ describe("feather.users.retrieve", function() {
 describe("feather.users.update", function() {
   beforeEach(function() {
     nock.disableNetConnect();
+    feather.setXFeatherSessionHeader("foo.session.token");
   });
 
   afterEach(function() {
     nock.cleanAll();
     nock.enableNetConnect();
+    feather.setXFeatherSessionHeader(null);
   });
 
   it("should reject invalid input", function() {
@@ -871,7 +820,8 @@ describe("feather.users.update", function() {
     const scope = nock("http://localhost:8080", {
       reqHeaders: {
         Authorization: "Basic dGVzdF9sYUNaR1lmYURSZU5td2tsWnNmSXJUc0ZhNW5WaDk6",
-        "Content-Type": "application/x-www-form-urlencoded"
+        "Content-Type": "application/x-www-form-urlencoded",
+        "x-feather-session": "foo.session.token"
       }
     })
       .post("/v1/users/USR_foo", "metadata%5BhighScore%5D=101")
@@ -903,11 +853,13 @@ describe("feather.users.update", function() {
 describe("feather.users.updateEmail", function() {
   beforeEach(function() {
     nock.disableNetConnect();
+    feather.setXFeatherSessionHeader("foo.session.token");
   });
 
   afterEach(function() {
     nock.cleanAll();
     nock.enableNetConnect();
+    feather.setXFeatherSessionHeader(null);
   });
 
   it("should reject invalid input", function() {
@@ -976,7 +928,8 @@ describe("feather.users.updateEmail", function() {
     const scope = nock("http://localhost:8080", {
       reqHeaders: {
         Authorization: "Basic dGVzdF9sYUNaR1lmYURSZU5td2tsWnNmSXJUc0ZhNW5WaDk6",
-        "Content-Type": "application/x-www-form-urlencoded"
+        "Content-Type": "application/x-www-form-urlencoded",
+        "x-feather-session": "foo.session.token"
       }
     })
       .post(
@@ -1011,11 +964,13 @@ describe("feather.users.updateEmail", function() {
 describe("feather.users.updatePassword", function() {
   beforeEach(function() {
     nock.disableNetConnect();
+    feather.setXFeatherSessionHeader("foo.session.token");
   });
 
   afterEach(function() {
     nock.cleanAll();
     nock.enableNetConnect();
+    feather.setXFeatherSessionHeader(null);
   });
 
   it("should reject invalid input", function() {
@@ -1084,7 +1039,8 @@ describe("feather.users.updatePassword", function() {
     const scope = nock("http://localhost:8080", {
       reqHeaders: {
         Authorization: "Basic dGVzdF9sYUNaR1lmYURSZU5td2tsWnNmSXJUc0ZhNW5WaDk6",
-        "Content-Type": "application/x-www-form-urlencoded"
+        "Content-Type": "application/x-www-form-urlencoded",
+        "x-feather-session": "foo.session.token"
       }
     })
       .post(
@@ -1121,11 +1077,13 @@ describe("feather.users.updatePassword", function() {
 describe("feather._gateway", function() {
   beforeEach(function() {
     nock.disableNetConnect();
+    feather.setXFeatherSessionHeader("foo.session.token");
   });
 
   afterEach(function() {
     nock.cleanAll();
     nock.enableNetConnect();
+    feather.setXFeatherSessionHeader(null);
   });
 
   it("should reject unparsable response", function() {
