@@ -4,12 +4,12 @@
 
 This library provides a convenient interface to the Feather API for applications running in a Javascript-supported browser client environment.
 
-## Installation
+## Install
 
 ```sh
-$ npm install @feather-id/feather-client-js --save
+$ npm install feather-client-js --save
 # or
-$ yarn add @feather-id/feather-client-js
+$ yarn add feather-client-js
 ```
 
 ## Usage
@@ -19,7 +19,7 @@ The Feather package must be initialized with your project's API key, available o
 ```js
 import { Feather } from "feather-client-js";
 
-const feather = Feather("pk_test_tZwHa2NRqGLt1A8qqhbdA8u7XcINW17A");
+const feather = Feather("pk_test_tZxHb2NRqGLt2A9qqhbdA8u7XdINW17A");
 ```
 
 ### Using Promises

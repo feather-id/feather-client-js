@@ -1,4 +1,3 @@
-const credentialTypes = require("../credentialTypes");
 const utils = require("../utils");
 const {
   FeatherError,
@@ -23,9 +22,6 @@ const credentials = {
           isRequired: false,
           params: {
             email: {
-              type: "string"
-            },
-            username: {
               type: "string"
             },
             password: {
