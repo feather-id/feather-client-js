@@ -25,7 +25,7 @@ module.exports = function signInAnonymously() {
       })
       .then(session => {
         that._gateway.setXFeatherSessionHeader(session.token);
-        Promise.all([
+        return Promise.all([
           session,
           that._gateway.users.retrieve(session.userId, session.token)
         ]);

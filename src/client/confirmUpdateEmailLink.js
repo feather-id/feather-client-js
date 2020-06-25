@@ -42,7 +42,7 @@ module.exports = function confirmUpdateEmailLink(url) {
             message: "The verification code is invalid."
           });
         }
-        Promise.all([
+        return Promise.all([
           state,
           that._gateway.users.updateEmail(
             state.session.userId,
