@@ -7,13 +7,14 @@ const {
 
 const users = {
   _gateway: null,
+  _xFeatherSession: null,
 
   /**
    * Retrieves a user
    * @arg id
    * @return user
    */
-  retrieve: function(id, accessToken) {
+  retrieve: function(id) {
     const that = this;
     return new Promise(function(resolve, reject) {
       // Validate input
@@ -27,16 +28,16 @@ const users = {
         );
         return;
       }
-      if (typeof accessToken !== "string") {
+      if (!that._xFeatherSession) {
         reject(
           new FeatherError({
             type: FeatherErrorType.VALIDATION,
             code: FeatherErrorCode.HEADER_MISSING,
-            message: `expected param 'accessToken' to be of type 'string'`
+            message: `This method requires an 'x-feather-session' header. Please use the 'setXFeatherSessionHeader' convenience method to provide valid session token for authorizing this request.`
           })
         );
       }
-      const headers = { Authorization: "Bearer " + accessToken };
+      const headers = { "x-feather-session": that._xFeatherSession };
 
       // Send request
       const path = "/users/" + id;
@@ -51,10 +52,9 @@ const users = {
    * Updates a user
    * @arg id
    * @arg { metadata }
-   * @arg accessToken
    * @return user
    */
-  update: function(id, data, accessToken) {
+  update: function(id, data) {
     const that = this;
     return new Promise(function(resolve, reject) {
       // Validate input
@@ -81,16 +81,16 @@ const users = {
         reject(error);
         return;
       }
-      if (typeof accessToken !== "string") {
+      if (!that._xFeatherSession) {
         reject(
           new FeatherError({
             type: FeatherErrorType.VALIDATION,
             code: FeatherErrorCode.HEADER_MISSING,
-            message: `expected param 'accessToken' to be of type 'string'`
+            message: `This method requires an 'x-feather-session' header. Please use the 'setXFeatherSessionHeader' convenience method to provide valid session token for authorizing this request.`
           })
         );
       }
-      const headers = { Authorization: "Bearer " + accessToken };
+      const headers = { "x-feather-session": that._xFeatherSession };
 
       // Send request
       that._httpGateway
@@ -104,7 +104,6 @@ const users = {
    * Updates a user's email
    * @arg id
    * @arg { credentialToken, newEmail }
-   * @arg accessToken
    * @return user
    */
   updateEmail: function(id, data) {
@@ -139,16 +138,16 @@ const users = {
         reject(error);
         return;
       }
-      if (typeof accessToken !== "string") {
+      if (!that._xFeatherSession) {
         reject(
           new FeatherError({
             type: FeatherErrorType.VALIDATION,
             code: FeatherErrorCode.HEADER_MISSING,
-            message: `expected param 'accessToken' to be of type 'string'`
+            message: `This method requires an 'x-feather-session' header. Please use the 'setXFeatherSessionHeader' convenience method to provide valid session token for authorizing this request.`
           })
         );
       }
-      const headers = { Authorization: "Bearer " + accessToken };
+      const headers = { "x-feather-session": that._xFeatherSession };
 
       // Send request
       const path = "/users/" + id + "/email";
@@ -163,7 +162,6 @@ const users = {
    * Updates a user's password
    * @arg id
    * @arg { credentialToken, newPassword }
-   * @arg accessToken
    * @return user
    */
   updatePassword: function(id, data) {
@@ -198,16 +196,16 @@ const users = {
         reject(error);
         return;
       }
-      if (typeof accessToken !== "string") {
+      if (!that._xFeatherSession) {
         reject(
           new FeatherError({
             type: FeatherErrorType.VALIDATION,
             code: FeatherErrorCode.HEADER_MISSING,
-            message: `expected param 'accessToken' to be of type 'string'`
+            message: `This method requires an 'x-feather-session' header. Please use the 'setXFeatherSessionHeader' convenience method to provide valid session token for authorizing this request.`
           })
         );
       }
-      const headers = { Authorization: "Bearer " + accessToken };
+      const headers = { "x-feather-session": that._xFeatherSession };
 
       // Send request
       const path = "/users/" + id + "/password";

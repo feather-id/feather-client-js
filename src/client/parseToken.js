@@ -5,9 +5,6 @@ const {
   FeatherErrorCode
 } = require("../errors");
 
-// TODO probably rename to something like validateIDToken
-// TODO but is this even needed in the client library???
-
 function parseToken(tokenString, getPublicKey) {
   return new Promise(function(resolve, reject) {
     const invalidTokenError = new FeatherError({
@@ -69,6 +66,10 @@ function parseToken(tokenString, getPublicKey) {
           reject(invalidTokenError);
           return;
         }
+        if (parsedToken.payload.ses.substring(0, 4) !== "SES_") {
+          reject(invalidTokenError);
+          return;
+        }
 
         // TODO Give buffer for clock skew?
         const now = Math.floor(Date.now() / 1000);
@@ -77,12 +78,17 @@ function parseToken(tokenString, getPublicKey) {
           return;
         }
 
-        const user = {
-          id: parsedToken.payload.sub,
-          object: "user"
+        const session = {
+          id: parsedToken.payload.ses,
+          object: "session",
+          status: "active",
+          token: tokenString,
+          userId: parsedToken.payload.sub,
+          createdAt: parsedToken.payload.cat,
+          revokedAt: null
         };
 
-        resolve(user);
+        resolve(session);
       })
       .catch(err => reject(err));
   });
