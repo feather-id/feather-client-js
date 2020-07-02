@@ -51,13 +51,12 @@ module.exports = function confirmSignInLink(url) {
           return that._gateway.sessions.create({ credentialToken });
         }
       })
-      .then(session => {
-        that._gateway.setXFeatherSessionHeader(session.token);
-        return Promise.all([
+      .then(session =>
+        Promise.all([
           session,
-          that._gateway.users.retrieve(session.userId, session.token)
-        ]);
-      })
+          that._gateway.users.retrieve(session.userId, session.accessToken)
+        ])
+      )
       .then(([session, user]) =>
         updateCurrentState({ session, user, credential: null })
       )

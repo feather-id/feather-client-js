@@ -45,15 +45,12 @@ module.exports = function signIn(email, password) {
           return that._gateway.sessions.create({ credentialToken });
         }
       })
-      .then(session => {
-        console.log("session");
-        console.log(session);
-        that._gateway.setXFeatherSessionHeader(session.token);
-        return Promise.all([
+      .then(session =>
+        Promise.all([
           session,
-          that._gateway.users.retrieve(session.userId, session.token)
-        ]);
-      })
+          that._gateway.users.retrieve(session.userId, session.accessToken)
+        ])
+      )
       .then(([session, user]) =>
         updateCurrentState({ session, user, credential: null })
       )
