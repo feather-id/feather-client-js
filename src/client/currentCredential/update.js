@@ -1,8 +1,10 @@
-module.exports = function update(client, params) {
+module.exports = function update(client, credential, params) {
   return new Promise(function(resolve, reject) {
     client._gateway.credentials
-      .update(client.currentCredential.id, params)
-      .then(user => resolve(client._setCurrentUser(user)))
+      .update(credential.id, params)
+      .then(updatedCredential =>
+        resolve(client._setCurrentCredential(updatedCredential))
+      )
       .catch(error => reject(error));
   });
 };

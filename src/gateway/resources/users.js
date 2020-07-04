@@ -18,7 +18,6 @@ const users = {
     return new Promise(function(resolve, reject) {
       // Validate input
       var headers = {};
-      console.log(credentialToken);
       if (credentialToken) {
         if (typeof credentialToken !== "string") {
           reject(
@@ -190,6 +189,7 @@ const users = {
       };
 
       // Send request
+      const data = { newEmail };
       const path = "/users/" + id + "/email";
       that._httpGateway
         .sendRequest("POST", path, data, headers)
@@ -254,6 +254,7 @@ const users = {
       };
 
       // Send request
+      const data = { newPassword };
       const path = "/users/" + id + "/password";
       that._httpGateway
         .sendRequest("POST", path, data, headers)
@@ -298,7 +299,7 @@ const users = {
       // Send request
       const path = `/users/${id}/tokens`;
       that._httpGateway
-        .sendRequest("POST", path, data, headers)
+        .sendRequest("POST", path, null, headers)
         .then(res => resolve(res))
         .catch(err => reject(err));
     });
@@ -339,7 +340,7 @@ const users = {
       // Send request
       const path = `/users/${id}/tokens`;
       that._httpGateway
-        .sendRequest("DELETE", path, data, headers)
+        .sendRequest("DELETE", path, null, headers)
         .then(res => resolve(res))
         .catch(err => reject(err));
     });

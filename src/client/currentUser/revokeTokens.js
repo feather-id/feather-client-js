@@ -1,11 +1,9 @@
-module.exports = function revokeTokens(client) {
+module.exports = function revokeTokens(client, user) {
   return new Promise(function(resolve, reject) {
     client._gateway.users
-      .revokeTokens(
-        client.currentUser.id,
-        client.currentUser.tokens.refreshToken
-      )
-      .then(user => resolve(client._setCurrentUser(user)))
+      .revokeTokens(user.id, user.tokens.refreshToken)
+      .then(updatedUser => client._setCurrentUser(null))
+      .then(() => resolve(null))
       .catch(error => reject(error));
   });
 };

@@ -1,12 +1,8 @@
 const { Gateway } = require("../gateway");
 const { fetchCurrentState, updateCurrentState } = require("./database");
-const currentCredentialUpdate = require("./currentCredential/update.js");
-const currentUserRefreshTokens = require("./currentUser/refreshTokens.js");
-const currentUserRevokeTokens = require("./currentUser/revokeTokens.js");
-const currentUserUpdate = require("./currentUser/update.js");
-const currentUserUpdateEmail = require("./currentUser/updateEmail.js");
-const currentUserUpdatePassword = require("./currentUser/updatePassword.js");
+const getCurrentCredential = require("./currentCredential/get.js");
 const newCurrentCredential = require("./newCurrentCredential.js");
+const getCurrentUser = require("./currentUser/get.js");
 const newCurrentUser = require("./newCurrentUser.js");
 const onStateChange = require("./onStateChange.js");
 
@@ -21,6 +17,8 @@ function Client(apiKey, config = {}) {
   }
   this._gateway = Gateway(apiKey, config);
 
+  console.log("[Feather] initializing client");
+
   fetchCurrentState()
     .then(state => {
       if (!state) {
@@ -28,21 +26,27 @@ function Client(apiKey, config = {}) {
           credential: null,
           user: null
         });
-        this._notifyStateObservers();
-      } else {
-        this._setCurrentCredential(state.credential);
-        this._setCurrentUser(state.user);
       }
     })
     .catch(error => {
       console.log(error);
     });
 
-  this._onStateChangeObservers = [];
-  this.onStateChange = onStateChange;
+  this.currentUser = () => getCurrentUser(this);
+  this.currentCredential = () => getCurrentCredential(this);
+
   this.newCurrentCredential = params => newCurrentCredential(this, params);
   this.newCurrentUser = credentialToken =>
     newCurrentUser(this, credentialToken);
+
+  this._onStateChangeObservers = [];
+  this.onStateChange = observer => {
+    this._onStateChangeObservers.push(observer);
+
+    // TODO return "unsubscribe" function
+
+    this.currentUser().then(currentUser => observer(currentUser));
+  };
 
   return this;
 }
@@ -53,19 +57,15 @@ Client.prototype = {
    * This may be removed in the future.
    */
   _setCurrentCredential(credential) {
-    this.currentCredential = {
-      ...credential,
-      update: params => currentUserUpdate(this, params)
-    };
-
-    fetchCurrentState()
-      .then(state => {
-        state.credential = credential;
-        return updateCurrentState(state);
-      })
-      .catch(error => {});
-
-    return this.currentCredential;
+    return new Promise(function(resolve, reject) {
+      fetchCurrentState()
+        .then(state => {
+          state.credential = credential;
+          return updateCurrentState(state);
+        })
+        .then(() => resolve())
+        .catch(error => {});
+    });
   },
 
   /**
@@ -73,26 +73,17 @@ Client.prototype = {
    * This may be removed in the future.
    */
   _setCurrentUser(user) {
-    this.currentUser = {
-      ...user,
-      refreshTokens: () => currentUserRefreshTokens(this),
-      revokeTokens: () => currentUserRevokeTokens(this),
-      update: params => currentUserUpdate(this, params),
-      updateEmail: (newEmail, credentialToken) =>
-        currentUserUpdateEmail(this, newEmail, credentialToken),
-      updatePassword: (newPassword, credentialToken) =>
-        currentUserUpdatePassword(this, newPassword, credentialToken)
-    };
-
-    fetchCurrentState()
-      .then(state => {
-        state.user = user;
-        return updateCurrentState(state);
-      })
-      .then(() => this._notifyStateObservers())
-      .catch(error => {});
-
-    return this.currentUser;
+    const that = this;
+    return new Promise(function(resolve, reject) {
+      fetchCurrentState()
+        .then(state => {
+          state.user = user;
+          return updateCurrentState(state);
+        })
+        .then(() => that._notifyStateObservers())
+        .then(() => resolve())
+        .catch(error => {});
+    });
   },
 
   /**
@@ -100,9 +91,18 @@ Client.prototype = {
    * This may be removed in the future.
    */
   _notifyStateObservers() {
-    this._onStateChangeObservers.forEach(observer =>
-      observer(this.currentUser)
-    );
+    const that = this;
+    return new Promise(function(resolve, reject) {
+      that
+        .currentUser()
+        .then(currentUser => {
+          that._onStateChangeObservers.forEach(observer =>
+            observer(currentUser)
+          );
+          resolve();
+        })
+        .catch(error => reject(error));
+    });
   }
 };
 

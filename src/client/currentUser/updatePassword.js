@@ -1,13 +1,23 @@
-module.exports = function updateEmail(client, newPassword, credentialToken) {
+module.exports = function updatePassword(
+  client,
+  user,
+  newPassword,
+  credentialToken
+) {
   return new Promise(function(resolve, reject) {
     client._gateway.users
       .updatePassword(
-        client.currentUser.id,
+        user.id,
         newPassword,
-        client.currentUser.tokens.accessTokens.feather,
+        user.tokens.accessTokens.feather,
         credentialToken
       )
-      .then(user => resolve(client._setCurrentUser(user)))
+      .then(updatedUser => {
+        updatedUser.tokens = user.tokens;
+        return client._setCurrentUser(updatedUser);
+      })
+      .then(() => client.currentUser())
+      .then(currentUser => resolve(currentUser))
       .catch(error => reject(error));
   });
 };
