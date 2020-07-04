@@ -36,20 +36,14 @@ function handleApiResult(res, resolve, reject) {
 
 HttpGateway.prototype = {
   sendRequest(method, path, data, headers) {
-    console.log(
-      `[${method}] ${path} ${JSON.stringify(data)} ${JSON.stringify(headers)}`
-    );
-
     const that = this;
     return new Promise(function(resolve, reject) {
       // Build request data
-      if (!headers) {
-        headers = {};
-      }
-      if (!headers["Authorization"]) {
-        headers["Authorization"] = that._api.basicAuth;
-      }
-      headers["Content-Type"] = "application/x-www-form-urlencoded";
+      headers = {
+        ...headers,
+        Authorization: that._api.basicAuth,
+        "Content-Type": "application/x-www-form-urlencoded"
+      };
       var query = "";
       if (data) {
         data = utils.camelToSnakeCase(data);

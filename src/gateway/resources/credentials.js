@@ -10,7 +10,7 @@ const credentials = {
 
   /**
    * Creates a credential
-   * @arg { email, username, password, verificationUrl, templateName }
+   * @arg { email, password, redirectUrl, templateName }
    * @return credential
    */
   create: function(data) {

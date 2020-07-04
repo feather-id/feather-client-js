@@ -1,24 +1,16 @@
 const { Gateway } = require("../gateway");
 const { fetchCurrentState, updateCurrentState } = require("./database");
-const confirmEmailVerificationLink = require("./confirmEmailVerificationLink.js");
-const confirmForgotPasswordLink = require("./confirmForgotPasswordLink.js");
-const confirmSignInLink = require("./confirmSignInLink.js");
-const confirmUpdateEmailLink = require("./confirmUpdateEmailLink.js");
-const currentSession = require("./currentSession.js");
-const currentUser = require("./currentUser.js");
+const currentCredentialUpdate = require("./currentCredential/update.js");
+const currentUserRefreshTokens = require("./currentUser/refreshTokens.js");
+const currentUserRevokeTokens = require("./currentUser/revokeTokens.js");
+const currentUserUpdate = require("./currentUser/update.js");
+const currentUserUpdateEmail = require("./currentUser/updateEmail.js");
+const currentUserUpdatePassword = require("./currentUser/updatePassword.js");
+const newCurrentCredential = require("./newCurrentCredential.js");
+const newCurrentUser = require("./newCurrentUser.js");
 const onStateChange = require("./onStateChange.js");
-const sendEmailVerificationLink = require("./sendEmailVerificationLink.js");
-const sendForgotPasswordLink = require("./sendForgotPasswordLink.js");
-const sendSignInLink = require("./sendSignInLink.js");
-const sendUpdateEmailLink = require("./sendUpdateEmailLink.js");
-const signIn = require("./signIn.js");
-const signInAnonymously = require("./signInAnonymously.js");
-const signOut = require("./signOut.js");
-const updateUser = require("./updateUser.js");
-const updateUserEmail = require("./updateUserEmail.js");
-const updateUserPassword = require("./updateUserPassword.js");
 
-export function Client(apiKey, config = {}) {
+function Client(apiKey, config = {}) {
   if (!(this instanceof Client)) {
     return new Client(apiKey, config);
   }
@@ -34,41 +26,86 @@ export function Client(apiKey, config = {}) {
       if (!state) {
         updateCurrentState({
           credential: null,
-          session: null,
           user: null
         });
+        this._notifyStateObservers();
+      } else {
+        this._setCurrentCredential(state.credential);
+        this._setCurrentUser(state.user);
       }
-      this._notifyStateObservers();
     })
     .catch(error => {
       console.log(error);
     });
 
   this._onStateChangeObservers = [];
-  var that = this;
-  this._notifyStateObservers = function() {
-    fetchCurrentState().then(state => {
-      that._onStateChangeObservers.forEach(observer =>
-        observer(state.session, state.user)
-      );
-    });
-  };
-  this.confirmEmailVerificationLink = confirmEmailVerificationLink;
-  this.confirmForgotPasswordLink = confirmForgotPasswordLink;
-  this.confirmSignInLink = confirmSignInLink;
-  this.confirmUpdateEmailLink = confirmUpdateEmailLink;
-  this.currentSession = currentSession;
-  this.currentUser = currentUser;
   this.onStateChange = onStateChange;
-  this.sendEmailVerificationLink = sendEmailVerificationLink;
-  this.sendForgotPasswordLink = sendForgotPasswordLink;
-  this.sendSignInLink = sendSignInLink;
-  this.sendUpdateEmailLink = sendUpdateEmailLink;
-  this.signIn = signIn;
-  this.signInAnonymously = signInAnonymously;
-  this.signOut = signOut;
-  this.updateUser = updateUser;
-  this.updateUserEmail = updateUserEmail;
-  this.updateUserPassword = updateUserPassword;
+  this.newCurrentCredential = params => newCurrentCredential(this, params);
+  this.newCurrentUser = credentialToken =>
+    newCurrentUser(this, credentialToken);
+
   return this;
 }
+
+Client.prototype = {
+  /**
+   * @private
+   * This may be removed in the future.
+   */
+  _setCurrentCredential(credential) {
+    this.currentCredential = {
+      ...credential,
+      update: params => currentUserUpdate(this, params)
+    };
+
+    fetchCurrentState()
+      .then(state => {
+        state.credential = credential;
+        return updateCurrentState(state);
+      })
+      .catch(error => {});
+
+    return this.currentCredential;
+  },
+
+  /**
+   * @private
+   * This may be removed in the future.
+   */
+  _setCurrentUser(user) {
+    this.currentUser = {
+      ...user,
+      refreshTokens: () => currentUserRefreshTokens(this),
+      revokeTokens: () => currentUserRevokeTokens(this),
+      update: params => currentUserUpdate(this, params),
+      updateEmail: (newEmail, credentialToken) =>
+        currentUserUpdateEmail(this, newEmail, credentialToken),
+      updatePassword: (newPassword, credentialToken) =>
+        currentUserUpdatePassword(this, newPassword, credentialToken)
+    };
+
+    fetchCurrentState()
+      .then(state => {
+        state.user = user;
+        return updateCurrentState(state);
+      })
+      .then(() => this._notifyStateObservers())
+      .catch(error => {});
+
+    return this.currentUser;
+  },
+
+  /**
+   * @private
+   * This may be removed in the future.
+   */
+  _notifyStateObservers() {
+    this._onStateChangeObservers.forEach(observer =>
+      observer(this.currentUser)
+    );
+  }
+};
+
+module.exports = { Client };
+module.exports.Client = Client;
+module.exports.default = Client;
