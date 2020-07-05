@@ -1,24 +1,13 @@
 const { Gateway } = require("../gateway");
 const { fetchCurrentState, updateCurrentState } = require("./database");
-const confirmEmailVerificationLink = require("./confirmEmailVerificationLink.js");
-const confirmForgotPasswordLink = require("./confirmForgotPasswordLink.js");
-const confirmSignInLink = require("./confirmSignInLink.js");
-const confirmUpdateEmailLink = require("./confirmUpdateEmailLink.js");
-const currentSession = require("./currentSession.js");
-const currentUser = require("./currentUser.js");
+const getCurrentCredential = require("./currentCredential/get.js");
+const newCurrentCredential = require("./newCurrentCredential.js");
+const getCurrentUser = require("./currentUser/get.js");
+const newCurrentUser = require("./newCurrentUser.js");
 const onStateChange = require("./onStateChange.js");
-const sendEmailVerificationLink = require("./sendEmailVerificationLink.js");
-const sendForgotPasswordLink = require("./sendForgotPasswordLink.js");
-const sendSignInLink = require("./sendSignInLink.js");
-const sendUpdateEmailLink = require("./sendUpdateEmailLink.js");
-const signIn = require("./signIn.js");
-const signInAnonymously = require("./signInAnonymously.js");
-const signOut = require("./signOut.js");
-const updateUser = require("./updateUser.js");
-const updateUserEmail = require("./updateUserEmail.js");
-const updateUserPassword = require("./updateUserPassword.js");
+const jws = require("jws");
 
-export function Client(apiKey, config = {}) {
+function Client(apiKey, config = {}) {
   if (!(this instanceof Client)) {
     return new Client(apiKey, config);
   }
@@ -29,46 +18,126 @@ export function Client(apiKey, config = {}) {
   }
   this._gateway = Gateway(apiKey, config);
 
+  console.log("[Feather] initializing client");
+
+  const that = this;
   fetchCurrentState()
     .then(state => {
       if (!state) {
-        updateCurrentState({
+        return updateCurrentState({
           credential: null,
-          session: null,
           user: null
         });
       }
-      this._notifyStateObservers();
+      return Promise.resolve();
     })
+    .then(() => that._scheduleUserTokenRefresh())
     .catch(error => {
       console.log(error);
     });
 
+  this.currentUser = () => getCurrentUser(this);
+  this.currentCredential = () => getCurrentCredential(this);
+
+  this.newCurrentCredential = params => newCurrentCredential(this, params);
+  this.newCurrentUser = credentialToken =>
+    newCurrentUser(this, credentialToken);
+
   this._onStateChangeObservers = [];
-  var that = this;
-  this._notifyStateObservers = function() {
-    fetchCurrentState().then(state => {
-      that._onStateChangeObservers.forEach(observer =>
-        observer(state.session, state.user)
-      );
-    });
+  this.onStateChange = observer => {
+    this._onStateChangeObservers.push(observer);
+    // TODO return "unsubscribe" function
+    this.currentUser().then(currentUser => observer(currentUser));
   };
-  this.confirmEmailVerificationLink = confirmEmailVerificationLink;
-  this.confirmForgotPasswordLink = confirmForgotPasswordLink;
-  this.confirmSignInLink = confirmSignInLink;
-  this.confirmUpdateEmailLink = confirmUpdateEmailLink;
-  this.currentSession = currentSession;
-  this.currentUser = currentUser;
-  this.onStateChange = onStateChange;
-  this.sendEmailVerificationLink = sendEmailVerificationLink;
-  this.sendForgotPasswordLink = sendForgotPasswordLink;
-  this.sendSignInLink = sendSignInLink;
-  this.sendUpdateEmailLink = sendUpdateEmailLink;
-  this.signIn = signIn;
-  this.signInAnonymously = signInAnonymously;
-  this.signOut = signOut;
-  this.updateUser = updateUser;
-  this.updateUserEmail = updateUserEmail;
-  this.updateUserPassword = updateUserPassword;
+
+  this._refreshTimerId = null;
+
   return this;
 }
+
+Client.prototype = {
+  /**
+   * @private
+   * This may be removed in the future.
+   */
+  _setCurrentCredential(credential) {
+    return new Promise(function(resolve, reject) {
+      fetchCurrentState()
+        .then(state => {
+          state.credential = credential;
+          return updateCurrentState(state);
+        })
+        .then(() => resolve())
+        .catch(error => {});
+    });
+  },
+
+  /**
+   * @private
+   * This may be removed in the future.
+   */
+  _setCurrentUser(user) {
+    const that = this;
+    return new Promise(function(resolve, reject) {
+      fetchCurrentState()
+        .then(state => {
+          state.user = user;
+          return updateCurrentState(state);
+        })
+        .then(() => that._notifyStateObservers())
+        .then(() => that._scheduleUserTokenRefresh())
+        .then(() => resolve())
+        .catch(error => {});
+    });
+  },
+
+  /**
+   * @private
+   * This may be removed in the future.
+   */
+  _notifyStateObservers() {
+    const that = this;
+    return new Promise(function(resolve, reject) {
+      that
+        .currentUser()
+        .then(currentUser => {
+          that._onStateChangeObservers.forEach(observer =>
+            observer(currentUser)
+          );
+          resolve();
+        })
+        .catch(error => reject(error));
+    });
+  },
+
+  _scheduleUserTokenRefresh() {
+    const that = this;
+    return new Promise(function(resolve, reject) {
+      that
+        .currentUser()
+        .then(currentUser => {
+          if (currentUser) {
+            if (currentUser.tokens.idToken) {
+              const decodedToken = jws.decode(currentUser.tokens.idToken);
+              const expiresAt = new Date(decodedToken.payload.exp * 1000);
+              const ms = Math.max(
+                0,
+                Math.abs(expiresAt - new Date()) - 30 * 1000 // 30s before expiration
+              );
+              if (that._refreshTimerId) {
+                clearTimeout(that._refreshTimerId);
+                that._refreshTimerId = null;
+              }
+              that._refreshTimerId = setTimeout(currentUser.refreshTokens, ms);
+            }
+          }
+          resolve();
+        })
+        .catch(error => reject(error));
+    });
+  }
+};
+
+module.exports = { Client };
+module.exports.Client = Client;
+module.exports.default = Client;

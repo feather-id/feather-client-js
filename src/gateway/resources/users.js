@@ -7,14 +7,45 @@ const {
 
 const users = {
   _gateway: null,
-  _xFeatherSession: null,
+
+  /**
+   * Creates a user
+   * @arg credentialToken
+   * @return user
+   */
+  create: function(credentialToken) {
+    const that = this;
+    return new Promise(function(resolve, reject) {
+      // Validate input
+      var headers = {};
+      if (credentialToken) {
+        if (typeof credentialToken !== "string") {
+          reject(
+            new FeatherError({
+              type: FeatherErrorType.VALIDATION,
+              code: FeatherErrorCode.PARAMETER_INVALID,
+              message: `expected param 'credentialToken' to be of type 'string'`
+            })
+          );
+          return;
+        }
+        headers["X-Credential-Token"] = credentialToken;
+      }
+
+      // Send request
+      that._httpGateway
+        .sendRequest("POST", "/users", null, headers)
+        .then(res => resolve(res))
+        .catch(err => reject(err));
+    });
+  },
 
   /**
    * Retrieves a user
    * @arg id
    * @return user
    */
-  retrieve: function(id) {
+  retrieve: function(id, accessToken) {
     const that = this;
     return new Promise(function(resolve, reject) {
       // Validate input
@@ -28,16 +59,16 @@ const users = {
         );
         return;
       }
-      if (!that._xFeatherSession) {
+      if (typeof accessToken !== "string") {
         reject(
           new FeatherError({
             type: FeatherErrorType.VALIDATION,
             code: FeatherErrorCode.HEADER_MISSING,
-            message: `This method requires an 'x-feather-session' header. Please use the 'setXFeatherSessionHeader' convenience method to provide valid session token for authorizing this request.`
+            message: `expected param 'accessToken' to be of type 'string'`
           })
         );
       }
-      const headers = { "x-feather-session": that._xFeatherSession };
+      const headers = { "X-Access-Token": accessToken };
 
       // Send request
       const path = "/users/" + id;
@@ -52,9 +83,10 @@ const users = {
    * Updates a user
    * @arg id
    * @arg { metadata }
+   * @arg accessToken
    * @return user
    */
-  update: function(id, data) {
+  update: function(id, data, accessToken) {
     const that = this;
     return new Promise(function(resolve, reject) {
       // Validate input
@@ -81,16 +113,16 @@ const users = {
         reject(error);
         return;
       }
-      if (!that._xFeatherSession) {
+      if (typeof accessToken !== "string") {
         reject(
           new FeatherError({
             type: FeatherErrorType.VALIDATION,
             code: FeatherErrorCode.HEADER_MISSING,
-            message: `This method requires an 'x-feather-session' header. Please use the 'setXFeatherSessionHeader' convenience method to provide valid session token for authorizing this request.`
+            message: `expected param 'accessToken' to be of type 'string'`
           })
         );
       }
-      const headers = { "x-feather-session": that._xFeatherSession };
+      const headers = { "X-Access-Token": accessToken };
 
       // Send request
       that._httpGateway
@@ -103,10 +135,12 @@ const users = {
   /**
    * Updates a user's email
    * @arg id
-   * @arg { credentialToken, newEmail }
+   * @arg newEmail
+   * @arg accessToken
+   * @arg credentialToken
    * @return user
    */
-  updateEmail: function(id, data) {
+  updateEmail: function(id, newEmail, accessToken, credentialToken) {
     const that = this;
     return new Promise(function(resolve, reject) {
       // Validate input
@@ -120,36 +154,41 @@ const users = {
         );
         return;
       }
-      try {
-        utils.validateData(data, {
-          isRequired: true,
-          params: {
-            credentialToken: {
-              type: "string",
-              isRequired: true
-            },
-            newEmail: {
-              type: "string",
-              isRequired: true
-            }
-          }
-        });
-      } catch (error) {
-        reject(error);
+      if (typeof newEmail !== "string") {
+        reject(
+          new FeatherError({
+            type: FeatherErrorType.VALIDATION,
+            code: FeatherErrorCode.PARAMETER_INVALID,
+            message: `expected param 'newEmail' to be of type 'string'`
+          })
+        );
         return;
       }
-      if (!that._xFeatherSession) {
+      if (typeof accessToken !== "string") {
         reject(
           new FeatherError({
             type: FeatherErrorType.VALIDATION,
             code: FeatherErrorCode.HEADER_MISSING,
-            message: `This method requires an 'x-feather-session' header. Please use the 'setXFeatherSessionHeader' convenience method to provide valid session token for authorizing this request.`
+            message: `expected param 'accessToken' to be of type 'string'`
           })
         );
       }
-      const headers = { "x-feather-session": that._xFeatherSession };
+      if (typeof credentialToken !== "string") {
+        reject(
+          new FeatherError({
+            type: FeatherErrorType.VALIDATION,
+            code: FeatherErrorCode.HEADER_MISSING,
+            message: `expected param 'credentialToken' to be of type 'string'`
+          })
+        );
+      }
+      const headers = {
+        "X-Access-Token": accessToken,
+        "X-Credential-Token": credentialToken
+      };
 
       // Send request
+      const data = { newEmail };
       const path = "/users/" + id + "/email";
       that._httpGateway
         .sendRequest("POST", path, data, headers)
@@ -161,10 +200,12 @@ const users = {
   /**
    * Updates a user's password
    * @arg id
-   * @arg { credentialToken, newPassword }
+   * @arg newPassword
+   * @arg accessToken
+   * @arg credentialToken
    * @return user
    */
-  updatePassword: function(id, data) {
+  updatePassword: function(id, newPassword, accessToken, credentialToken) {
     const that = this;
     return new Promise(function(resolve, reject) {
       // Validate input
@@ -178,39 +219,126 @@ const users = {
         );
         return;
       }
-      try {
-        utils.validateData(data, {
-          isRequired: true,
-          params: {
-            credentialToken: {
-              type: "string",
-              isRequired: true
-            },
-            newPassword: {
-              type: "string",
-              isRequired: true
-            }
-          }
-        });
-      } catch (error) {
-        reject(error);
+      if (typeof newPassword !== "string") {
+        reject(
+          new FeatherError({
+            type: FeatherErrorType.VALIDATION,
+            code: FeatherErrorCode.PARAMETER_INVALID,
+            message: `expected param 'newPassword' to be of type 'string'`
+          })
+        );
         return;
       }
-      if (!that._xFeatherSession) {
+      if (typeof accessToken !== "string") {
         reject(
           new FeatherError({
             type: FeatherErrorType.VALIDATION,
             code: FeatherErrorCode.HEADER_MISSING,
-            message: `This method requires an 'x-feather-session' header. Please use the 'setXFeatherSessionHeader' convenience method to provide valid session token for authorizing this request.`
+            message: `expected param 'accessToken' to be of type 'string'`
           })
         );
       }
-      const headers = { "x-feather-session": that._xFeatherSession };
+      if (typeof credentialToken !== "string") {
+        reject(
+          new FeatherError({
+            type: FeatherErrorType.VALIDATION,
+            code: FeatherErrorCode.HEADER_MISSING,
+            message: `expected param 'credentialToken' to be of type 'string'`
+          })
+        );
+      }
+      const headers = {
+        "X-Access-Token": accessToken,
+        "X-Credential-Token": credentialToken
+      };
 
       // Send request
+      const data = { newPassword };
       const path = "/users/" + id + "/password";
       that._httpGateway
         .sendRequest("POST", path, data, headers)
+        .then(res => resolve(res))
+        .catch(err => reject(err));
+    });
+  },
+
+  /**
+   * Refreshes a user's tokens
+   * @arg id
+   * @arg refreshToken
+   * @return user
+   */
+  refreshTokens: function(id, refreshToken) {
+    const that = this;
+    return new Promise(function(resolve, reject) {
+      // Validate input
+      if (typeof id !== "string") {
+        reject(
+          new FeatherError({
+            type: FeatherErrorType.VALIDATION,
+            code: FeatherErrorCode.PARAMETER_INVALID,
+            message: `expected param 'id' to be of type 'string'`
+          })
+        );
+        return;
+      }
+      if (typeof refreshToken !== "string") {
+        reject(
+          new FeatherError({
+            type: FeatherErrorType.VALIDATION,
+            code: FeatherErrorCode.PARAMETER_INVALID,
+            message: `expected param 'refreshToken' to be of type 'string'`
+          })
+        );
+        return;
+      }
+      const headers = { "X-Refresh-Token": refreshToken };
+
+      // Send request
+      const path = `/users/${id}/tokens`;
+      that._httpGateway
+        .sendRequest("POST", path, null, headers)
+        .then(res => resolve(res))
+        .catch(err => reject(err));
+    });
+  },
+
+  /**
+   * Revokes a user's tokens
+   * @arg id
+   * @arg refreshToken
+   * @return user
+   */
+  revokeTokens: function(id, refreshToken) {
+    const that = this;
+    return new Promise(function(resolve, reject) {
+      // Validate input
+      if (typeof id !== "string") {
+        reject(
+          new FeatherError({
+            type: FeatherErrorType.VALIDATION,
+            code: FeatherErrorCode.PARAMETER_INVALID,
+            message: `expected param 'id' to be of type 'string'`
+          })
+        );
+        return;
+      }
+      if (typeof refreshToken !== "string") {
+        reject(
+          new FeatherError({
+            type: FeatherErrorType.VALIDATION,
+            code: FeatherErrorCode.PARAMETER_INVALID,
+            message: `expected param 'refreshToken' to be of type 'string'`
+          })
+        );
+        return;
+      }
+      const headers = { "X-Refresh-Token": refreshToken };
+
+      // Send request
+      const path = `/users/${id}/tokens`;
+      that._httpGateway
+        .sendRequest("DELETE", path, null, headers)
         .then(res => resolve(res))
         .catch(err => reject(err));
     });

@@ -18,7 +18,7 @@ function HttpGateway(apiKey, config = {}) {
   }
 
   this._api = {
-    auth: "Basic " + Buffer.from(apiKey + ":").toString("base64"),
+    basicAuth: "Basic " + Buffer.from(apiKey + ":").toString("base64"),
     host: config.host || DEFAULT_HOST,
     port: config.port || DEFAULT_PORT,
     protocol: config.protocol || DEFAULT_PROTOCOL,
@@ -36,18 +36,14 @@ function handleApiResult(res, resolve, reject) {
 
 HttpGateway.prototype = {
   sendRequest(method, path, data, headers) {
-    console.log(
-      `[${method}] ${path} ${JSON.stringify(data)} ${JSON.stringify(headers)}`
-    );
-
     const that = this;
     return new Promise(function(resolve, reject) {
       // Build request data
-      if (!headers) {
-        headers = {};
-      }
-      headers["Authorization"] = that._api.auth;
-      headers["Content-Type"] = "application/x-www-form-urlencoded";
+      headers = {
+        ...headers,
+        Authorization: that._api.basicAuth,
+        "Content-Type": "application/x-www-form-urlencoded"
+      };
       var query = "";
       if (data) {
         data = utils.camelToSnakeCase(data);

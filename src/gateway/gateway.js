@@ -34,15 +34,6 @@ function Gateway(apiKey, config = {}) {
 Gateway.prototype = {
   /**
    * @private
-   * This may be removed in the future
-   */
-  setXFeatherSessionHeader(sessionToken) {
-    this.sessions._xFeatherSession = sessionToken;
-    this.users._xFeatherSession = sessionToken;
-  },
-
-  /**
-   * @private
    * This may be removed in the future.
    */
   _prepareResources() {
