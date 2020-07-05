@@ -11,7 +11,7 @@ const users = {
   /**
    * Creates a user
    * @arg credentialToken
-   * @return session
+   * @return user
    */
   create: function(credentialToken) {
     const that = this;
@@ -173,15 +173,14 @@ const users = {
           })
         );
       }
-      if (typeof refreshToken !== "string") {
+      if (typeof credentialToken !== "string") {
         reject(
           new FeatherError({
             type: FeatherErrorType.VALIDATION,
-            code: FeatherErrorCode.PARAMETER_INVALID,
-            message: `expected param 'refreshToken' to be of type 'string'`
+            code: FeatherErrorCode.HEADER_MISSING,
+            message: `expected param 'credentialToken' to be of type 'string'`
           })
         );
-        return;
       }
       const headers = {
         "X-Access-Token": accessToken,
@@ -293,7 +292,6 @@ const users = {
         );
         return;
       }
-
       const headers = { "X-Refresh-Token": refreshToken };
 
       // Send request
