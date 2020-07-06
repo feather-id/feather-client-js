@@ -22,7 +22,13 @@ const utils = {
     switch (typeof x) {
       case "object":
         if (Array.isArray(x)) {
-          return x.map(xo => this.camelToSnakeCase(xo));
+          return x.map(xo => {
+            if (typeof xo === "object") {
+              return this.camelToSnakeCase(xo);
+            } else {
+              return xo;
+            }
+          });
         } else {
           var out = {};
           for (let [k, v] of Object.entries(x)) {
@@ -57,7 +63,11 @@ const utils = {
     switch (typeof x) {
       case "object":
         if (Array.isArray(x)) {
-          return x.map(xo => this.snakeToCamelCase(xo));
+          if (typeof xo === "object") {
+            return x.map(xo => this.snakeToCamelCase(xo));
+          } else {
+            return xo;
+          }
         } else {
           var out = {};
           for (let [k, v] of Object.entries(x)) {
