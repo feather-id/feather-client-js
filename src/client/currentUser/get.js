@@ -43,7 +43,7 @@ function shouldRefreshTokens(user) {
   if (user.tokens) {
     if (user.tokens.idToken) {
       const decodedToken = jws.decode(user.tokens.idToken);
-      const expiresAt = new Date(decodedToken.payload.exp * 1000);
+      const expiresAt = new Date(decodedToken.payload.exp);
       const now = Math.floor(Date.now() / 1000);
       return now - 30 > expiresAt;
     }
