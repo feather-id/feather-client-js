@@ -4,6 +4,7 @@ const userRevokeTokens = require("./revokeTokens.js");
 const userUpdate = require("./update.js");
 const userUpdateEmail = require("./updateEmail.js");
 const userUpdatePassword = require("./updatePassword.js");
+const jws = require("jws");
 
 module.exports = function get(client) {
   return new Promise(function(resolve, reject) {
@@ -11,26 +12,41 @@ module.exports = function get(client) {
       .then(state => {
         if (state) {
           if (state.user) {
-            resolve({
-              ...state.user,
-              refreshTokens: () => userRefreshTokens(client, state.user),
-              revokeTokens: () => userRevokeTokens(client, state.user),
-              update: params => userUpdate(client, state.user, params),
-              updateEmail: (newEmail, credentialToken) =>
-                userUpdateEmail(client, state.user, newEmail, credentialToken),
-              updatePassword: (newPassword, credentialToken) =>
-                userUpdatePassword(
-                  client,
-                  state.user,
-                  newPassword,
-                  credentialToken
-                )
-            });
-            return;
+            if (shouldRefreshTokens(state.user)) {
+              return userRefreshTokens(client, state.user);
+            } else {
+              return Promise.resolve(state.user);
+            }
           }
         }
         resolve(null);
       })
+      .then(user => {
+        if (user) {
+          resolve({
+            ...user,
+            refreshTokens: () => userRefreshTokens(client, user),
+            revokeTokens: () => userRevokeTokens(client, user),
+            update: params => userUpdate(client, user, params),
+            updateEmail: (newEmail, credentialToken) =>
+              userUpdateEmail(client, user, newEmail, credentialToken),
+            updatePassword: (newPassword, credentialToken) =>
+              userUpdatePassword(client, user, newPassword, credentialToken)
+          });
+        }
+      })
       .catch(error => reject(error));
   });
 };
+
+function shouldRefreshTokens(user) {
+  if (user.tokens) {
+    if (user.tokens.idToken) {
+      const decodedToken = jws.decode(user.tokens.idToken);
+      const expiresAt = new Date(decodedToken.payload.exp * 1000);
+      const now = Math.floor(Date.now() / 1000);
+      return now - 30 > expiresAt;
+    }
+  }
+  return false;
+}

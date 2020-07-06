@@ -5,7 +5,6 @@ const newCurrentCredential = require("./newCurrentCredential.js");
 const getCurrentUser = require("./currentUser/get.js");
 const newCurrentUser = require("./newCurrentUser.js");
 const onStateChange = require("./onStateChange.js");
-const jws = require("jws");
 
 function Client(apiKey, config = {}) {
   if (!(this instanceof Client)) {
@@ -29,9 +28,7 @@ function Client(apiKey, config = {}) {
           user: null
         });
       }
-      return Promise.resolve();
     })
-    .then(() => that._scheduleUserTokenRefresh())
     .catch(error => {
       console.log(error);
     });
@@ -49,8 +46,6 @@ function Client(apiKey, config = {}) {
     // TODO return "unsubscribe" function
     this.currentUser().then(currentUser => observer(currentUser));
   };
-
-  this._refreshTimerId = null;
 
   this.passwords = this._gateway.passwords;
 
@@ -87,7 +82,6 @@ Client.prototype = {
           return updateCurrentState(state);
         })
         .then(() => that._notifyStateObservers())
-        .then(() => that._scheduleUserTokenRefresh())
         .then(() => resolve())
         .catch(error => {});
     });
@@ -106,33 +100,6 @@ Client.prototype = {
           that._onStateChangeObservers.forEach(observer =>
             observer(currentUser)
           );
-          resolve();
-        })
-        .catch(error => reject(error));
-    });
-  },
-
-  _scheduleUserTokenRefresh() {
-    const that = this;
-    return new Promise(function(resolve, reject) {
-      that
-        .currentUser()
-        .then(currentUser => {
-          if (currentUser) {
-            if (currentUser.tokens.idToken) {
-              const decodedToken = jws.decode(currentUser.tokens.idToken);
-              const expiresAt = new Date(decodedToken.payload.exp * 1000);
-              const ms = Math.max(
-                0,
-                Math.abs(expiresAt - new Date()) - 30 * 1000 // 30s before expiration
-              );
-              if (that._refreshTimerId) {
-                clearTimeout(that._refreshTimerId);
-                that._refreshTimerId = null;
-              }
-              that._refreshTimerId = setTimeout(currentUser.refreshTokens, ms);
-            }
-          }
           resolve();
         })
         .catch(error => reject(error));
