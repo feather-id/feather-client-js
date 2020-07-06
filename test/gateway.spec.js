@@ -100,7 +100,7 @@ const sampleCredetialRequiresVerificationCode = {
   object: "credential",
   created_at: "2020-01-01T15:44:00.939855294Z",
   expires_at: "2020-01-01T15:59:00.939855294Z",
-  status: "requires_verification_code",
+  status: "requires_verification",
   token: null,
   type: "email"
 };
