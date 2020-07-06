@@ -286,6 +286,67 @@ describe("feather.credentials.update", function() {
   });
 });
 
+// * * * * * Passwords * * * * * ///
+
+const samplePassword = {
+  object: "password",
+  created_at: "2020-01-01T15:44:00.939855294Z"
+};
+
+describe("feather.passwords.create", function() {
+  beforeEach(function() {
+    nock.disableNetConnect();
+  });
+
+  afterEach(function() {
+    nock.cleanAll();
+    nock.enableNetConnect();
+  });
+
+  it("should reject invalid input", function() {
+    expect(feather.passwords.create(true, "foo")).to.be.rejectedWith(
+      `expected param 'password' to be of type 'string'`
+    );
+
+    expect(feather.passwords.create(123, "foo")).to.be.rejectedWith(
+      `expected param 'password' to be of type 'string'`
+    );
+
+    expect(feather.passwords.create({}, "foo")).to.be.rejectedWith(
+      `expected param 'password' to be of type 'string'`
+    );
+
+    expect(feather.passwords.create(null, "foo")).to.be.rejectedWith(
+      `expected param 'password' to be of type 'string'`
+    );
+  });
+
+  it("should create a password", function() {
+    const scope = nock("http://localhost:8080", {
+      reqHeaders: {
+        Authorization: "Basic dGVzdF9sYUNaR1lmYURSZU5td2tsWnNmSXJUc0ZhNW5WaDk6",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "X-Credential-Token": "foo"
+      }
+    })
+      .post("/v1/passwords", "password=n3w_p4ssw0rd")
+      .times(1)
+      .reply(200, samplePassword);
+    return expect(
+      feather.passwords.create("n3w_p4ssw0rd", "foo")
+    ).to.eventually.deep.equal(utils.snakeToCamelCase(samplePassword));
+  });
+
+  it("should reject a gateway error", function() {
+    const scope = nock("http://localhost:8080")
+      .post("/v1/passwords")
+      .replyWithError("boom");
+    return expect(
+      feather.passwords.create("n3w_p4ssw0rd", "foo")
+    ).to.be.rejectedWith("boom");
+  });
+});
+
 // * * * * * Users * * * * * //
 
 const sampleUserAnonymous = {
@@ -628,61 +689,6 @@ describe("feather.users.updateEmail", function() {
       .replyWithError("boom");
     return expect(
       feather.users.updateEmail("USR_foo", "foo@bar.com", "foo", "bar")
-    ).to.be.rejectedWith("boom");
-  });
-});
-
-describe("feather.users.updatePassword", function() {
-  beforeEach(function() {
-    nock.disableNetConnect();
-  });
-
-  afterEach(function() {
-    nock.cleanAll();
-    nock.enableNetConnect();
-  });
-
-  it("should reject invalid input", function() {
-    expect(
-      feather.users.updatePassword(true, "n3w_p4ssw0rd", "foo", "bar")
-    ).to.be.rejectedWith(`expected param 'id' to be of type 'string'`);
-
-    expect(
-      feather.users.updatePassword(123, "n3w_p4ssw0rd", "foo", "bar")
-    ).to.be.rejectedWith(`expected param 'id' to be of type 'string'`);
-
-    expect(
-      feather.users.updatePassword({}, "n3w_p4ssw0rd", "foo", "bar")
-    ).to.be.rejectedWith(`expected param 'id' to be of type 'string'`);
-
-    expect(
-      feather.users.updatePassword(null, "n3w_p4ssw0rd", "foo", "bar")
-    ).to.be.rejectedWith(`expected param 'id' to be of type 'string'`);
-  });
-
-  it("should update a user's password", function() {
-    const scope = nock("http://localhost:8080", {
-      reqHeaders: {
-        Authorization: "Basic dGVzdF9sYUNaR1lmYURSZU5td2tsWnNmSXJUc0ZhNW5WaDk6",
-        "Content-Type": "application/x-www-form-urlencoded",
-        "X-Access-Token": "foo",
-        "X-Credential-Token": "bar"
-      }
-    })
-      .post("/v1/users/USR_foo/password", "new_password=n3w_p4ssw0rd")
-      .times(1)
-      .reply(200, sampleUserAuthenticated);
-    return expect(
-      feather.users.updatePassword("USR_foo", "n3w_p4ssw0rd", "foo", "bar")
-    ).to.eventually.deep.equal(utils.snakeToCamelCase(sampleUserAuthenticated));
-  });
-
-  it("should reject a gateway error", function() {
-    const scope = nock("http://localhost:8080")
-      .post("/v1/users/USR_foo/password")
-      .replyWithError("boom");
-    return expect(
-      feather.users.updatePassword("USR_foo", "n3w_p4ssw0rd", "foo", "bar")
     ).to.be.rejectedWith("boom");
   });
 });

@@ -52,6 +52,8 @@ function Client(apiKey, config = {}) {
 
   this._refreshTimerId = null;
 
+  this.passwords = this._gateway.passwords;
+
   return this;
 }
 
