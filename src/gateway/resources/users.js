@@ -17,7 +17,7 @@ const users = {
     const that = this;
     return new Promise(function(resolve, reject) {
       // Validate input
-      var headers = {};
+      var data = {};
       if (credentialToken) {
         if (typeof credentialToken !== "string") {
           reject(
@@ -29,12 +29,13 @@ const users = {
           );
           return;
         }
-        headers["X-Credential-Token"] = credentialToken;
+        data = { credentialToken: credentialToken };
       }
 
       // Send request
+      const path = `/users`;
       that._httpGateway
-        .sendRequest("POST", "/users", null, headers)
+        .sendRequest("POST", path, data)
         .then(res => resolve(res))
         .catch(err => reject(err));
     });
@@ -45,7 +46,7 @@ const users = {
    * @arg id
    * @return user
    */
-  retrieve: function(id, accessToken) {
+  retrieve: function(id, idToken) {
     const that = this;
     return new Promise(function(resolve, reject) {
       // Validate input
@@ -59,19 +60,19 @@ const users = {
         );
         return;
       }
-      if (typeof accessToken !== "string") {
+      if (typeof idToken !== "string") {
         reject(
           new FeatherError({
             type: FeatherErrorType.VALIDATION,
             code: FeatherErrorCode.HEADER_MISSING,
-            message: `expected param 'accessToken' to be of type 'string'`
+            message: `expected param 'idToken' to be of type 'string'`
           })
         );
       }
-      const headers = { "X-Access-Token": accessToken };
+      const headers = { Authorization: "Bearer " + idToken };
 
       // Send request
-      const path = "/users/" + id;
+      const path = `/users/${id}`;
       that._httpGateway
         .sendRequest("GET", path, null, headers)
         .then(res => resolve(res))
@@ -83,10 +84,10 @@ const users = {
    * Updates a user
    * @arg id
    * @arg { metadata }
-   * @arg accessToken
+   * @arg idToken
    * @return user
    */
-  update: function(id, data, accessToken) {
+  update: function(id, data, idToken) {
     const that = this;
     return new Promise(function(resolve, reject) {
       // Validate input
@@ -113,20 +114,21 @@ const users = {
         reject(error);
         return;
       }
-      if (typeof accessToken !== "string") {
+      if (typeof idToken !== "string") {
         reject(
           new FeatherError({
             type: FeatherErrorType.VALIDATION,
             code: FeatherErrorCode.HEADER_MISSING,
-            message: `expected param 'accessToken' to be of type 'string'`
+            message: `expected param 'idToken' to be of type 'string'`
           })
         );
       }
-      const headers = { "X-Access-Token": accessToken };
+      const headers = { Authorization: "Bearer " + idToken };
 
       // Send request
+      const path = `/users/${id}`;
       that._httpGateway
-        .sendRequest("POST", "/users/" + id, data, headers)
+        .sendRequest("POST", path, data, headers)
         .then(res => resolve(res))
         .catch(err => reject(err));
     });
@@ -136,11 +138,11 @@ const users = {
    * Updates a user's email
    * @arg id
    * @arg newEmail
-   * @arg accessToken
+   * @arg idToken
    * @arg credentialToken
    * @return user
    */
-  updateEmail: function(id, newEmail, accessToken, credentialToken) {
+  updateEmail: function(id, newEmail, credentialToken, idToken) {
     const that = this;
     return new Promise(function(resolve, reject) {
       // Validate input
@@ -164,12 +166,12 @@ const users = {
         );
         return;
       }
-      if (typeof accessToken !== "string") {
+      if (typeof idToken !== "string") {
         reject(
           new FeatherError({
             type: FeatherErrorType.VALIDATION,
             code: FeatherErrorCode.HEADER_MISSING,
-            message: `expected param 'accessToken' to be of type 'string'`
+            message: `expected param 'idToken' to be of type 'string'`
           })
         );
       }
@@ -182,14 +184,11 @@ const users = {
           })
         );
       }
-      const headers = {
-        "X-Access-Token": accessToken,
-        "X-Credential-Token": credentialToken
-      };
+      const headers = { Authorization: "Bearer " + idToken };
+      const data = { newEmail, credentialToken };
 
       // Send request
-      const data = { newEmail };
-      const path = "/users/" + id + "/email";
+      const path = `/users/${id}/email`;
       that._httpGateway
         .sendRequest("POST", path, data, headers)
         .then(res => resolve(res))
@@ -227,12 +226,12 @@ const users = {
         );
         return;
       }
-      const headers = { "X-Refresh-Token": refreshToken };
+      const data = { refreshToken };
 
       // Send request
       const path = `/users/${id}/tokens`;
       that._httpGateway
-        .sendRequest("POST", path, null, headers)
+        .sendRequest("POST", path, data)
         .then(res => resolve(res))
         .catch(err => reject(err));
     });
@@ -268,12 +267,12 @@ const users = {
         );
         return;
       }
-      const headers = { "X-Refresh-Token": refreshToken };
+      const data = { refreshToken };
 
       // Send request
       const path = `/users/${id}/tokens`;
       that._httpGateway
-        .sendRequest("DELETE", path, null, headers)
+        .sendRequest("DELETE", path, data)
         .then(res => resolve(res))
         .catch(err => reject(err));
     });

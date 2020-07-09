@@ -41,8 +41,9 @@ const credentials = {
       }
 
       // Send request
+      const path = `/credentials`;
       that._httpGateway
-        .sendRequest("POST", "/credentials", data)
+        .sendRequest("POST", path, data)
         .then(res => resolve(res))
         .catch(err => reject(err));
     });
@@ -84,7 +85,7 @@ const credentials = {
       }
 
       // Send request
-      const path = "/credentials/" + id;
+      const path = `/credentials/${id}`;
       that._httpGateway
         .sendRequest("POST", path, data)
         .then(res => resolve(res))

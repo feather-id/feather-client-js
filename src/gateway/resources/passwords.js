@@ -38,14 +38,12 @@ const passwords = {
         );
         return;
       }
-      const headers = {
-        "X-Credential-Token": credentialToken
-      };
 
       // Send request
-      const data = { password };
+      const data = { password, credentialToken };
+      const path = `/passwords`;
       that._httpGateway
-        .sendRequest("POST", "/passwords", data, headers)
+        .sendRequest("POST", path, data)
         .then(res => resolve(res))
         .catch(err => reject(err));
     });

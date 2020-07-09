@@ -325,11 +325,10 @@ describe("feather.passwords.create", function() {
     const scope = nock("http://localhost:8080", {
       reqHeaders: {
         Authorization: "Basic dGVzdF9sYUNaR1lmYURSZU5td2tsWnNmSXJUc0ZhNW5WaDk6",
-        "Content-Type": "application/x-www-form-urlencoded",
-        "X-Credential-Token": "foo"
+        "Content-Type": "application/x-www-form-urlencoded"
       }
     })
-      .post("/v1/passwords", "password=n3w_p4ssw0rd")
+      .post("/v1/passwords", "password=n3w_p4ssw0rd&credential_token=foo")
       .times(1)
       .reply(200, samplePassword);
     return expect(
@@ -416,11 +415,10 @@ describe("feather.users.create", function() {
     const scope = nock("http://localhost:8080", {
       reqHeaders: {
         Authorization: "Basic dGVzdF9sYUNaR1lmYURSZU5td2tsWnNmSXJUc0ZhNW5WaDk6",
-        "Content-Type": "application/x-www-form-urlencoded",
-        "X-Credential-Token": "foo"
+        "Content-Type": "application/x-www-form-urlencoded"
       }
     })
-      .post("/v1/users", {})
+      .post("/v1/users", "credential_token=foo")
       .times(1)
       .reply(200, sampleUserAuthenticated);
     return expect(feather.users.create("foo")).to.eventually.deep.equal(
@@ -464,28 +462,27 @@ describe("feather.users.retrieve", function() {
     );
 
     expect(feather.users.retrieve("foo", true)).to.be.rejectedWith(
-      `expected param 'accessToken' to be of type 'string'`
+      `expected param 'idToken' to be of type 'string'`
     );
 
     expect(feather.users.retrieve("foo", 123)).to.be.rejectedWith(
-      `expected param 'accessToken' to be of type 'string'`
+      `expected param 'idToken' to be of type 'string'`
     );
 
     expect(feather.users.retrieve("foo", {})).to.be.rejectedWith(
-      `expected param 'accessToken' to be of type 'string'`
+      `expected param 'idToken' to be of type 'string'`
     );
 
     expect(feather.users.retrieve("foo", null)).to.be.rejectedWith(
-      `expected param 'accessToken' to be of type 'string'`
+      `expected param 'idToken' to be of type 'string'`
     );
   });
 
   it("should retrieve a user", function() {
     const scope = nock("http://localhost:8080", {
       reqHeaders: {
-        Authorization: "Basic dGVzdF9sYUNaR1lmYURSZU5td2tsWnNmSXJUc0ZhNW5WaDk6",
-        "Content-Type": "application/x-www-form-urlencoded",
-        "X-Access-Token": "foo"
+        Authorization: "Bearer foo",
+        "Content-Type": "application/x-www-form-urlencoded"
       }
     })
       .get("/v1/users/USR_foo", {})
@@ -548,28 +545,27 @@ describe("feather.users.update", function() {
     );
 
     expect(feather.users.update("USR_foo", {}, true)).to.be.rejectedWith(
-      `expected param 'accessToken' to be of type 'string'`
+      `expected param 'idToken' to be of type 'string'`
     );
 
     expect(feather.users.update("USR_foo", {}, 123)).to.be.rejectedWith(
-      `expected param 'accessToken' to be of type 'string'`
+      `expected param 'idToken' to be of type 'string'`
     );
 
     expect(feather.users.update("USR_foo", {}, {})).to.be.rejectedWith(
-      `expected param 'accessToken' to be of type 'string'`
+      `expected param 'idToken' to be of type 'string'`
     );
 
     expect(feather.users.update("USR_foo", {}, null)).to.be.rejectedWith(
-      `expected param 'accessToken' to be of type 'string'`
+      `expected param 'idToken' to be of type 'string'`
     );
   });
 
   it("should update a user", function() {
     const scope = nock("http://localhost:8080", {
       reqHeaders: {
-        Authorization: "Basic dGVzdF9sYUNaR1lmYURSZU5td2tsWnNmSXJUc0ZhNW5WaDk6",
-        "Content-Type": "application/x-www-form-urlencoded",
-        "X-Access-Token": "foo"
+        Authorization: "Bearer foo",
+        "Content-Type": "application/x-www-form-urlencoded"
       }
     })
       .post("/v1/users/USR_foo", "metadata%5BhighScore%5D=101")
@@ -669,13 +665,14 @@ describe("feather.users.updateEmail", function() {
   it("should update a user's email", function() {
     const scope = nock("http://localhost:8080", {
       reqHeaders: {
-        Authorization: "Basic dGVzdF9sYUNaR1lmYURSZU5td2tsWnNmSXJUc0ZhNW5WaDk6",
-        "Content-Type": "application/x-www-form-urlencoded",
-        "X-Access-Token": "foo",
-        "X-Credential-Token": "bar"
+        Authorization: "Bearer bar",
+        "Content-Type": "application/x-www-form-urlencoded"
       }
     })
-      .post("/v1/users/USR_foo/email", "new_email=foo%40bar.com")
+      .post(
+        "/v1/users/USR_foo/email",
+        "new_email=foo%40bar.com&credential_token=foo"
+      )
       .times(1)
       .reply(200, sampleUserAuthenticated);
     return expect(
@@ -725,11 +722,10 @@ describe("feather.users.refreshTokens", function() {
     const scope = nock("http://localhost:8080", {
       reqHeaders: {
         Authorization: "Basic dGVzdF9sYUNaR1lmYURSZU5td2tsWnNmSXJUc0ZhNW5WaDk6",
-        "Content-Type": "application/x-www-form-urlencoded",
-        "X-Refresh-Token": "foo"
+        "Content-Type": "application/x-www-form-urlencoded"
       }
     })
-      .post("/v1/users/USR_foo/tokens", {})
+      .post("/v1/users/USR_foo/tokens", "refresh_token=foo")
       .times(1)
       .reply(200, sampleUserAuthenticated);
     return expect(
@@ -739,7 +735,7 @@ describe("feather.users.refreshTokens", function() {
 
   it("should reject a gateway error", function() {
     const scope = nock("http://localhost:8080")
-      .post("/v1/users/USR_foo/tokens", {})
+      .post("/v1/users/USR_foo/tokens", "refresh_token=foo")
       .replyWithError("boom");
     return expect(
       feather.users.refreshTokens("USR_foo", "foo")
@@ -779,11 +775,10 @@ describe("feather.users.revokeTokens", function() {
     const scope = nock("http://localhost:8080", {
       reqHeaders: {
         Authorization: "Basic dGVzdF9sYUNaR1lmYURSZU5td2tsWnNmSXJUc0ZhNW5WaDk6",
-        "Content-Type": "application/x-www-form-urlencoded",
-        "X-Refresh-Token": "foo"
+        "Content-Type": "application/x-www-form-urlencoded"
       }
     })
-      .delete("/v1/users/USR_foo/tokens", {})
+      .delete("/v1/users/USR_foo/tokens?refresh_token=foo")
       .times(1)
       .reply(200, sampleUserAuthenticated);
     return expect(
@@ -793,7 +788,7 @@ describe("feather.users.revokeTokens", function() {
 
   it("should reject a gateway error", function() {
     const scope = nock("http://localhost:8080")
-      .delete("/v1/users/USR_foo/tokens", {})
+      .delete("/v1/users/USR_foo/tokens?refresh_token=foo")
       .replyWithError("boom");
     return expect(
       feather.users.revokeTokens("USR_foo", "foo")

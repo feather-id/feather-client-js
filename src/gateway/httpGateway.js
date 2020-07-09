@@ -41,18 +41,23 @@ HttpGateway.prototype = {
       // Build request data
       headers = {
         ...headers,
-        Authorization: that._api.basicAuth,
         "Content-Type": "application/x-www-form-urlencoded"
       };
+      if (!headers.Authorization) {
+        headers.Authorization = that._api.basicAuth;
+      }
       var query = "";
       if (data) {
         data = utils.camelToSnakeCase(data);
         switch (method) {
+          case "DELETE":
           case "GET":
-            query = "?";
-            for (let [key, value] of Object.entries(data)) {
-              query += key + "=" + value;
-            }
+            query =
+              "?" +
+              Object.entries(data)
+                .map(([key, value]) => `${key}=${value}`)
+                .join("&");
+
             break;
 
           case "POST":
