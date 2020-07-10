@@ -4,6 +4,8 @@
 
 This library provides a convenient stateful interface to the Feather API for applications running in a Javascript client environment.
 
+Have any questions? We're hanging out on [Discord](https://discord.gg/S55amqV) 👋
+
 ## Install
 
 ```sh
@@ -81,7 +83,3 @@ Run the tests:
 $ yarn install
 $ yarn test
 ```
-
-## More Information
-
-Have any questions? We're hanging out on [Discord](https://discord.gg/S55amqV)!
