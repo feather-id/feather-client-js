@@ -2,7 +2,7 @@
 
 ![npm](https://img.shields.io/npm/v/feather-id?color=5c70d6)
 
-This library provides a convenient interface to the Feather API for applications running in a Javascript-supported browser client environment.
+This library provides a convenient stateful interface to the Feather API for applications running in a Javascript client environment.
 
 ## Install
 
@@ -19,31 +19,58 @@ The Feather package must be initialized with your project's API key, available o
 ```js
 import { Feather } from "feather-client-js";
 
-const feather = Feather("pk_test_tZxHb2NRqGLt2A9qqhbdA8u7XdINW17A");
+const feather = Feather("YOUR_API_KEY");
 ```
 
-### Using Promises
-
-Every method returns a promise:
+Subscribe to authentication state changes:
 
 ```js
-feather.credentials
-  .create({
+feather.onStateChange(currentUser => {
+  console.log(`The current user is: ${JSON.stringify(currentUser)}`);
+});
+```
+
+Create an anonymous user:
+
+```js
+feather
+  .newCurrentUser()
+  .then(currentUser => {
+    console.log(currentUser);
+  })
+  .catch(e => {
+    // Handle errors
+  });
+```
+
+Create an authenticated user:
+
+```js
+feather
+  .newCurrentCredential({
     email: "foo@example.com",
     password: "pa$$w0rd"
   })
   .then(credential => {
-    return feather.sessions.create({
-      credential_token: credential.token
-    });
+    if (credential.status !== "valid")
+      throw new Error("Email or password is incorrect.");
+    return feather.newCurrentUser(credential.token);
   })
-  .then(session => {
-    return feather.users.retrieve(session.user_id);
+  .then(currentUser => {
+    console.log(currentUser);
   })
-  .then(user => {
-    // User of the newly created session
-  })
-  .catch(error => {
+  .catch(e => {
+    // Handle errors
+  });
+```
+
+Sign out
+
+```js
+feather
+  .currentUser()
+  .then(currentUser => currentUser.revokeTokens())
+  .catch(e => {
     // Handle errors
   });
 ```
@@ -58,9 +85,3 @@ Run the tests:
 $ yarn install
 $ yarn test
 ```
-
-## More Information
-
-- [Feather Docs](https://feather.id/docs)
-- [API Reference](https://feather.id/docs/api)
-- [Error Handling](https://feather.id/docs/api#errors)
