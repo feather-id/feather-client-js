@@ -22,7 +22,7 @@ import { Feather } from "feather-client-js";
 const feather = Feather("YOUR_API_KEY");
 ```
 
-Subscribe to authentication state changes:
+To listen for changes to the authentication state:
 
 ```js
 feather.onStateChange(currentUser => {
@@ -43,9 +43,7 @@ feather
       throw new Error("Email or password is incorrect.");
     return feather.newCurrentUser(credential.token);
   })
-  .then(currentUser => {
-    console.log(currentUser);
-  })
+  .then(currentUser => console.log(currentUser))
   .catch(e => {
     // Handle errors
   });
@@ -56,9 +54,7 @@ To sign in anonymously:
 ```js
 feather
   .newCurrentUser()
-  .then(currentUser => {
-    console.log(currentUser);
-  })
+  .then(currentUser => console.log(currentUser))
   .catch(e => {
     // Handle errors
   });
