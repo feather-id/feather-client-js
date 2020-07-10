@@ -30,20 +30,7 @@ feather.onStateChange(currentUser => {
 });
 ```
 
-Create an anonymous user:
-
-```js
-feather
-  .newCurrentUser()
-  .then(currentUser => {
-    console.log(currentUser);
-  })
-  .catch(e => {
-    // Handle errors
-  });
-```
-
-Create an authenticated user:
+To sign in:
 
 ```js
 feather
@@ -64,7 +51,20 @@ feather
   });
 ```
 
-Sign out
+To sign in anonymously:
+
+```js
+feather
+  .newCurrentUser()
+  .then(currentUser => {
+    console.log(currentUser);
+  })
+  .catch(e => {
+    // Handle errors
+  });
+```
+
+To sign out:
 
 ```js
 feather
