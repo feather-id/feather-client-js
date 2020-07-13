@@ -45,7 +45,7 @@ function shouldRefreshTokens(user) {
       const decodedToken = jws.decode(user.tokens.idToken);
       const expiresAt = new Date(decodedToken.payload.exp);
       const now = Math.floor(Date.now() / 1000);
-      return now > expiresAt - 30;
+      return expiresAt - now < 30; // Return true if there are 30 seconds or less until the token expires
     }
   }
   return false;
