@@ -5,9 +5,9 @@ const newCurrentCredential = require("./newCurrentCredential.js");
 const getCurrentUser = require("./currentUser/get.js");
 const newCurrentUser = require("./newCurrentUser.js");
 
-function Client(apiKey, config = {}) {
-  if (!(this instanceof Client)) {
-    return new Client(apiKey, config);
+function FeatherClient(apiKey, config = {}) {
+  if (!(this instanceof FeatherClient)) {
+    return new FeatherClient(apiKey, config);
   }
   if (!window.indexedDB) {
     throw new Error(
@@ -54,7 +54,7 @@ function Client(apiKey, config = {}) {
   return this;
 }
 
-Client.prototype = {
+FeatherClient.prototype = {
   /**
    * @private
    * This may be removed in the future.
@@ -83,7 +83,15 @@ Client.prototype = {
           state.user = user;
           return updateCurrentState(state);
         })
-        .then(() => that._notifyStateObservers())
+        .then(() => {
+          if (sessionStorage) {
+            sessionStorage.setItem(
+              "feather.currentUser.idToken",
+              currentUser ? currentUser.tokens.idToken : null
+            );
+          }
+          return that._notifyStateObservers();
+        })
         .then(() => resolve())
         .catch(error => {});
     });
@@ -119,6 +127,6 @@ Client.prototype = {
   }
 };
 
-module.exports = { Client };
-module.exports.Client = Client;
-module.exports.default = Client;
+module.exports = { FeatherClient };
+module.exports.FeatherClient = FeatherClient;
+module.exports.default = FeatherClient;

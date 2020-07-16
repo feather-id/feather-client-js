@@ -1,7 +1,7 @@
 const testUtils = require("./testUtils.js");
 const utils = require("../src/gateway/utils.js");
 const { Gateway } = require("../src/gateway");
-const feather = Gateway(testUtils.getFeatherApiKey(), {
+const gateway = Gateway(testUtils.getFeatherApiKey(), {
   protocol: "http",
   host: "localhost",
   port: "8080"
@@ -15,7 +15,7 @@ const expect = chai.expect;
 
 // * * * * * Constructor * * * * * //
 
-describe("feather constructor", function() {
+describe("gateway constructor", function() {
   it("should only accept an api key of type string", function() {
     expect(() => {
       Gateway(true);
@@ -115,7 +115,7 @@ const sampleCredentialValid = {
   type: "email"
 };
 
-describe("feather.credentials.create", function() {
+describe("gateway.credentials.create", function() {
   beforeEach(function() {
     nock.disableNetConnect();
   });
@@ -133,7 +133,7 @@ describe("feather.credentials.create", function() {
       email: 123,
       password: "p4ssw0rd"
     };
-    expect(feather.credentials.create(data)).to.be.rejectedWith(
+    expect(gateway.credentials.create(data)).to.be.rejectedWith(
       `expected param 'email' to be of type 'string'`
     );
 
@@ -142,7 +142,7 @@ describe("feather.credentials.create", function() {
       email: true,
       password: "p4ssw0rd"
     };
-    expect(feather.credentials.create(data)).to.be.rejectedWith(
+    expect(gateway.credentials.create(data)).to.be.rejectedWith(
       `expected param 'email' to be of type 'string'`
     );
 
@@ -151,7 +151,7 @@ describe("feather.credentials.create", function() {
       email: {},
       password: "p4ssw0rd"
     };
-    expect(feather.credentials.create(data)).to.be.rejectedWith(
+    expect(gateway.credentials.create(data)).to.be.rejectedWith(
       `expected param 'email' to be of type 'string'`
     );
 
@@ -160,7 +160,7 @@ describe("feather.credentials.create", function() {
       email: "foo@bar.com",
       password: 123
     };
-    expect(feather.credentials.create(data)).to.be.rejectedWith(
+    expect(gateway.credentials.create(data)).to.be.rejectedWith(
       `expected param 'password' to be of type 'string'`
     );
 
@@ -169,7 +169,7 @@ describe("feather.credentials.create", function() {
       email: "foo@bar.com",
       password: true
     };
-    expect(feather.credentials.create(data)).to.be.rejectedWith(
+    expect(gateway.credentials.create(data)).to.be.rejectedWith(
       `expected param 'password' to be of type 'string'`
     );
 
@@ -178,7 +178,7 @@ describe("feather.credentials.create", function() {
       email: "foo@bar.com",
       password: {}
     };
-    expect(feather.credentials.create(data)).to.be.rejectedWith(
+    expect(gateway.credentials.create(data)).to.be.rejectedWith(
       `expected param 'password' to be of type 'string'`
     );
   });
@@ -201,7 +201,7 @@ describe("feather.credentials.create", function() {
       password: "bar",
       scopes: "upgrade_session"
     };
-    return expect(feather.credentials.create(data)).to.eventually.deep.equal(
+    return expect(gateway.credentials.create(data)).to.eventually.deep.equal(
       utils.snakeToCamelCase(sampleCredentialValid)
     );
   });
@@ -215,11 +215,11 @@ describe("feather.credentials.create", function() {
       password: "bar",
       scopes: "upgrade_session"
     };
-    return expect(feather.credentials.create(data)).to.be.rejectedWith("boom");
+    return expect(gateway.credentials.create(data)).to.be.rejectedWith("boom");
   });
 });
 
-describe("feather.credentials.update", function() {
+describe("gateway.credentials.update", function() {
   beforeEach(function() {
     nock.disableNetConnect();
   });
@@ -231,30 +231,30 @@ describe("feather.credentials.update", function() {
 
   it("should reject invalid input", function() {
     var data = { verification_code: "foo" };
-    expect(feather.credentials.update(123, data)).to.be.rejectedWith(
+    expect(gateway.credentials.update(123, data)).to.be.rejectedWith(
       `expected param 'id' to be of type 'string'`
     );
 
-    expect(feather.credentials.update(true, data)).to.be.rejectedWith(
+    expect(gateway.credentials.update(true, data)).to.be.rejectedWith(
       `expected param 'id' to be of type 'string'`
     );
 
-    expect(feather.credentials.update({}, data)).to.be.rejectedWith(
+    expect(gateway.credentials.update({}, data)).to.be.rejectedWith(
       `expected param 'id' to be of type 'string'`
     );
 
     var data = { verificationCode: 123 };
-    expect(feather.credentials.update("CRD_foo", data)).to.be.rejectedWith(
+    expect(gateway.credentials.update("CRD_foo", data)).to.be.rejectedWith(
       `expected param 'verificationCode' to be of type 'string'`
     );
 
     var data = { verificationCode: true };
-    expect(feather.credentials.update("CRD_foo", data)).to.be.rejectedWith(
+    expect(gateway.credentials.update("CRD_foo", data)).to.be.rejectedWith(
       `expected param 'verificationCode' to be of type 'string'`
     );
 
     var data = { verificationCode: {} };
-    expect(feather.credentials.update("CRD_foo", data)).to.be.rejectedWith(
+    expect(gateway.credentials.update("CRD_foo", data)).to.be.rejectedWith(
       `expected param 'verificationCode' to be of type 'string'`
     );
   });
@@ -271,7 +271,7 @@ describe("feather.credentials.update", function() {
       .reply(200, sampleCredentialValid);
     const data = { verificationCode: "foo" };
     return expect(
-      feather.credentials.update("CRD_foo", data)
+      gateway.credentials.update("CRD_foo", data)
     ).to.eventually.deep.equal(utils.snakeToCamelCase(sampleCredentialValid));
   });
 
@@ -281,7 +281,7 @@ describe("feather.credentials.update", function() {
       .replyWithError("boom");
     const data = { verificationCode: "foo" };
     return expect(
-      feather.credentials.update("CRD_foo", data)
+      gateway.credentials.update("CRD_foo", data)
     ).to.be.rejectedWith("boom");
   });
 });
@@ -293,7 +293,7 @@ const samplePassword = {
   created_at: "2020-01-01T15:44:00.939855294Z"
 };
 
-describe("feather.passwords.create", function() {
+describe("gateway.passwords.create", function() {
   beforeEach(function() {
     nock.disableNetConnect();
   });
@@ -304,19 +304,19 @@ describe("feather.passwords.create", function() {
   });
 
   it("should reject invalid input", function() {
-    expect(feather.passwords.create(true, "foo")).to.be.rejectedWith(
+    expect(gateway.passwords.create(true, "foo")).to.be.rejectedWith(
       `expected param 'password' to be of type 'string'`
     );
 
-    expect(feather.passwords.create(123, "foo")).to.be.rejectedWith(
+    expect(gateway.passwords.create(123, "foo")).to.be.rejectedWith(
       `expected param 'password' to be of type 'string'`
     );
 
-    expect(feather.passwords.create({}, "foo")).to.be.rejectedWith(
+    expect(gateway.passwords.create({}, "foo")).to.be.rejectedWith(
       `expected param 'password' to be of type 'string'`
     );
 
-    expect(feather.passwords.create(null, "foo")).to.be.rejectedWith(
+    expect(gateway.passwords.create(null, "foo")).to.be.rejectedWith(
       `expected param 'password' to be of type 'string'`
     );
   });
@@ -332,7 +332,7 @@ describe("feather.passwords.create", function() {
       .times(1)
       .reply(200, samplePassword);
     return expect(
-      feather.passwords.create("n3w_p4ssw0rd", "foo")
+      gateway.passwords.create("n3w_p4ssw0rd", "foo")
     ).to.eventually.deep.equal(utils.snakeToCamelCase(samplePassword));
   });
 
@@ -341,7 +341,7 @@ describe("feather.passwords.create", function() {
       .post("/v1/passwords")
       .replyWithError("boom");
     return expect(
-      feather.passwords.create("n3w_p4ssw0rd", "foo")
+      gateway.passwords.create("n3w_p4ssw0rd", "foo")
     ).to.be.rejectedWith("boom");
   });
 });
@@ -372,7 +372,7 @@ const sampleUserAuthenticated = {
   updated_at: "2020-05-13T19:41:45.566791Z"
 };
 
-describe("feather.users.create", function() {
+describe("gateway.users.create", function() {
   beforeEach(function() {
     nock.disableNetConnect();
   });
@@ -383,15 +383,15 @@ describe("feather.users.create", function() {
   });
 
   it("should reject invalid input", function() {
-    expect(feather.users.create(true)).to.be.rejectedWith(
+    expect(gateway.users.create(true)).to.be.rejectedWith(
       `expected param 'credentialToken' to be of type 'string'`
     );
 
-    expect(feather.users.create(123)).to.be.rejectedWith(
+    expect(gateway.users.create(123)).to.be.rejectedWith(
       `expected param 'credentialToken' to be of type 'string'`
     );
 
-    expect(feather.users.create({})).to.be.rejectedWith(
+    expect(gateway.users.create({})).to.be.rejectedWith(
       `expected param 'credentialToken' to be of type 'string'`
     );
   });
@@ -406,7 +406,7 @@ describe("feather.users.create", function() {
       .post("/v1/users", {})
       .times(1)
       .reply(200, sampleUserAnonymous);
-    return expect(feather.users.create()).to.eventually.deep.equal(
+    return expect(gateway.users.create()).to.eventually.deep.equal(
       utils.snakeToCamelCase(sampleUserAnonymous)
     );
   });
@@ -421,7 +421,7 @@ describe("feather.users.create", function() {
       .post("/v1/users", "credential_token=foo")
       .times(1)
       .reply(200, sampleUserAuthenticated);
-    return expect(feather.users.create("foo")).to.eventually.deep.equal(
+    return expect(gateway.users.create("foo")).to.eventually.deep.equal(
       utils.snakeToCamelCase(sampleUserAuthenticated)
     );
   });
@@ -430,11 +430,11 @@ describe("feather.users.create", function() {
     const scope = nock("http://localhost:8080")
       .post("/v1/users", {})
       .replyWithError("boom");
-    return expect(feather.users.create()).to.be.rejectedWith("boom");
+    return expect(gateway.users.create()).to.be.rejectedWith("boom");
   });
 });
 
-describe("feather.users.retrieve", function() {
+describe("gateway.users.retrieve", function() {
   beforeEach(function() {
     nock.disableNetConnect();
   });
@@ -445,35 +445,35 @@ describe("feather.users.retrieve", function() {
   });
 
   it("should reject invalid input", function() {
-    expect(feather.users.retrieve(true, "foo")).to.be.rejectedWith(
+    expect(gateway.users.retrieve(true, "foo")).to.be.rejectedWith(
       `expected param 'id' to be of type 'string'`
     );
 
-    expect(feather.users.retrieve(123, "foo")).to.be.rejectedWith(
+    expect(gateway.users.retrieve(123, "foo")).to.be.rejectedWith(
       `expected param 'id' to be of type 'string'`
     );
 
-    expect(feather.users.retrieve({}, "foo")).to.be.rejectedWith(
+    expect(gateway.users.retrieve({}, "foo")).to.be.rejectedWith(
       `expected param 'id' to be of type 'string'`
     );
 
-    expect(feather.users.retrieve(null, "foo")).to.be.rejectedWith(
+    expect(gateway.users.retrieve(null, "foo")).to.be.rejectedWith(
       `expected param 'id' to be of type 'string'`
     );
 
-    expect(feather.users.retrieve("foo", true)).to.be.rejectedWith(
+    expect(gateway.users.retrieve("foo", true)).to.be.rejectedWith(
       `expected param 'idToken' to be of type 'string'`
     );
 
-    expect(feather.users.retrieve("foo", 123)).to.be.rejectedWith(
+    expect(gateway.users.retrieve("foo", 123)).to.be.rejectedWith(
       `expected param 'idToken' to be of type 'string'`
     );
 
-    expect(feather.users.retrieve("foo", {})).to.be.rejectedWith(
+    expect(gateway.users.retrieve("foo", {})).to.be.rejectedWith(
       `expected param 'idToken' to be of type 'string'`
     );
 
-    expect(feather.users.retrieve("foo", null)).to.be.rejectedWith(
+    expect(gateway.users.retrieve("foo", null)).to.be.rejectedWith(
       `expected param 'idToken' to be of type 'string'`
     );
   });
@@ -489,7 +489,7 @@ describe("feather.users.retrieve", function() {
       .times(1)
       .reply(200, sampleUserAnonymous);
     return expect(
-      feather.users.retrieve("USR_foo", "foo")
+      gateway.users.retrieve("USR_foo", "foo")
     ).to.eventually.deep.equal(utils.snakeToCamelCase(sampleUserAnonymous));
   });
 
@@ -497,13 +497,13 @@ describe("feather.users.retrieve", function() {
     const scope = nock("http://localhost:8080")
       .get("/v1/users/USR_foo", {})
       .replyWithError("boom");
-    return expect(feather.users.retrieve("USR_foo", "foo")).to.be.rejectedWith(
+    return expect(gateway.users.retrieve("USR_foo", "foo")).to.be.rejectedWith(
       "boom"
     );
   });
 });
 
-describe("feather.users.update", function() {
+describe("gateway.users.update", function() {
   beforeEach(function() {
     nock.disableNetConnect();
   });
@@ -514,49 +514,49 @@ describe("feather.users.update", function() {
   });
 
   it("should reject invalid input", function() {
-    expect(feather.users.update(true, {}, "foo")).to.be.rejectedWith(
+    expect(gateway.users.update(true, {}, "foo")).to.be.rejectedWith(
       `expected param 'id' to be of type 'string'`
     );
 
-    expect(feather.users.update(123, {}, "foo")).to.be.rejectedWith(
+    expect(gateway.users.update(123, {}, "foo")).to.be.rejectedWith(
       `expected param 'id' to be of type 'string'`
     );
 
-    expect(feather.users.update({}, {}, "foo")).to.be.rejectedWith(
+    expect(gateway.users.update({}, {}, "foo")).to.be.rejectedWith(
       `expected param 'id' to be of type 'string'`
     );
 
-    expect(feather.users.update(null, {}, "foo")).to.be.rejectedWith(
+    expect(gateway.users.update(null, {}, "foo")).to.be.rejectedWith(
       `expected param 'id' to be of type 'string'`
     );
 
     var data = { metadata: true };
-    expect(feather.users.update("USR_foo", data, "foo")).to.be.rejectedWith(
+    expect(gateway.users.update("USR_foo", data, "foo")).to.be.rejectedWith(
       `expected param 'metadata' to be of type 'object'`
     );
     var data = { metadata: 123 };
-    expect(feather.users.update("USR_foo", data, "foo")).to.be.rejectedWith(
+    expect(gateway.users.update("USR_foo", data, "foo")).to.be.rejectedWith(
       `expected param 'metadata' to be of type 'object'`
     );
 
     var data = { metadata: "foo" };
-    expect(feather.users.update("USR_foo", data, "foo")).to.be.rejectedWith(
+    expect(gateway.users.update("USR_foo", data, "foo")).to.be.rejectedWith(
       `expected param 'metadata' to be of type 'object'`
     );
 
-    expect(feather.users.update("USR_foo", {}, true)).to.be.rejectedWith(
+    expect(gateway.users.update("USR_foo", {}, true)).to.be.rejectedWith(
       `expected param 'idToken' to be of type 'string'`
     );
 
-    expect(feather.users.update("USR_foo", {}, 123)).to.be.rejectedWith(
+    expect(gateway.users.update("USR_foo", {}, 123)).to.be.rejectedWith(
       `expected param 'idToken' to be of type 'string'`
     );
 
-    expect(feather.users.update("USR_foo", {}, {})).to.be.rejectedWith(
+    expect(gateway.users.update("USR_foo", {}, {})).to.be.rejectedWith(
       `expected param 'idToken' to be of type 'string'`
     );
 
-    expect(feather.users.update("USR_foo", {}, null)).to.be.rejectedWith(
+    expect(gateway.users.update("USR_foo", {}, null)).to.be.rejectedWith(
       `expected param 'idToken' to be of type 'string'`
     );
   });
@@ -575,7 +575,7 @@ describe("feather.users.update", function() {
       metadata: { highScore: 101 }
     };
     return expect(
-      feather.users.update("USR_foo", data, "foo")
+      gateway.users.update("USR_foo", data, "foo")
     ).to.eventually.deep.equal(utils.snakeToCamelCase(sampleUserAuthenticated));
   });
 
@@ -589,12 +589,12 @@ describe("feather.users.update", function() {
       metadata: { highScore: 101 }
     };
     return expect(
-      feather.users.update("USR_foo", data, "foo")
+      gateway.users.update("USR_foo", data, "foo")
     ).to.be.rejectedWith("boom");
   });
 });
 
-describe("feather.users.updateEmail", function() {
+describe("gateway.users.updateEmail", function() {
   beforeEach(function() {
     nock.disableNetConnect();
   });
@@ -606,60 +606,20 @@ describe("feather.users.updateEmail", function() {
 
   it("should reject invalid input", function() {
     expect(
-      feather.users.updateEmail(true, "foo@bar.com", "foo", "bar")
+      gateway.users.updateEmail(true, "foo@bar.com", "foo", "bar")
     ).to.be.rejectedWith(`expected param 'id' to be of type 'string'`);
 
     expect(
-      feather.users.updateEmail(123, "foo@bar.com", "foo", "bar")
+      gateway.users.updateEmail(123, "foo@bar.com", "foo", "bar")
     ).to.be.rejectedWith(`expected param 'id' to be of type 'string'`);
 
     expect(
-      feather.users.updateEmail({}, "foo@bar.com", "foo", "bar")
+      gateway.users.updateEmail({}, "foo@bar.com", "foo", "bar")
     ).to.be.rejectedWith(`expected param 'id' to be of type 'string'`);
 
     expect(
-      feather.users.updateEmail(null, "foo@bar.com", "foo", "bar")
+      gateway.users.updateEmail(null, "foo@bar.com", "foo", "bar")
     ).to.be.rejectedWith(`expected param 'id' to be of type 'string'`);
-
-    // var data = { newEmail: "foo@bar.com" };
-    // expect(feather.users.updateEmail("USR_foo", data)).to.be.rejectedWith(
-    //   `required param not provided: 'credentialToken'`
-    // );
-    //
-    // var data = { credentialToken: 123, newEmail: "foo@bar.com" };
-    // expect(feather.users.updateEmail("USR_foo", data)).to.be.rejectedWith(
-    //   `expected param 'credentialToken' to be of type 'string'`
-    // );
-    //
-    // var data = { credentialToken: {}, newEmail: "foo@bar.com" };
-    // expect(feather.users.updateEmail("USR_foo", data)).to.be.rejectedWith(
-    //   `expected param 'credentialToken' to be of type 'string'`
-    // );
-    //
-    // var data = { credentialToken: 123, newEmail: "n3w p4ssw0rd" };
-    // expect(feather.users.updateEmail("USR_foo", data)).to.be.rejectedWith(
-    //   `expected param 'credentialToken' to be of type 'string'`
-    // );
-    //
-    // var data = { credentialToken: "foo" };
-    // expect(feather.users.updateEmail("USR_foo", data)).to.be.rejectedWith(
-    //   `required param not provided: 'newEmail'`
-    // );
-    //
-    // var data = { credentialToken: "foo", newEmail: true };
-    // expect(feather.users.updateEmail("USR_foo", data)).to.be.rejectedWith(
-    //   `expected param 'newEmail' to be of type 'string'`
-    // );
-    //
-    // var data = { credentialToken: "foo", newEmail: 123 };
-    // expect(feather.users.updateEmail("USR_foo", data)).to.be.rejectedWith(
-    //   `expected param 'newEmail' to be of type 'string'`
-    // );
-    //
-    // var data = { credentialToken: "foo", newEmail: {} };
-    // expect(feather.users.updateEmail("USR_foo", data)).to.be.rejectedWith(
-    `expected param 'newEmail' to be of type 'string'`;
-    // );
   });
 
   it("should update a user's email", function() {
@@ -676,7 +636,7 @@ describe("feather.users.updateEmail", function() {
       .times(1)
       .reply(200, sampleUserAuthenticated);
     return expect(
-      feather.users.updateEmail("USR_foo", "foo@bar.com", "foo", "bar")
+      gateway.users.updateEmail("USR_foo", "foo@bar.com", "foo", "bar")
     ).to.eventually.deep.equal(utils.snakeToCamelCase(sampleUserAuthenticated));
   });
 
@@ -685,12 +645,12 @@ describe("feather.users.updateEmail", function() {
       .post("/v1/users/USR_foo/email")
       .replyWithError("boom");
     return expect(
-      feather.users.updateEmail("USR_foo", "foo@bar.com", "foo", "bar")
+      gateway.users.updateEmail("USR_foo", "foo@bar.com", "foo", "bar")
     ).to.be.rejectedWith("boom");
   });
 });
 
-describe("feather.users.refreshTokens", function() {
+describe("gateway.users.refreshTokens", function() {
   beforeEach(function() {
     nock.disableNetConnect();
   });
@@ -701,19 +661,19 @@ describe("feather.users.refreshTokens", function() {
   });
 
   it("should reject invalid input", function() {
-    expect(feather.users.refreshTokens(true, "foo")).to.be.rejectedWith(
+    expect(gateway.users.refreshTokens(true, "foo")).to.be.rejectedWith(
       `expected param 'id' to be of type 'string'`
     );
 
-    expect(feather.users.refreshTokens(123, "foo")).to.be.rejectedWith(
+    expect(gateway.users.refreshTokens(123, "foo")).to.be.rejectedWith(
       `expected param 'id' to be of type 'string'`
     );
 
-    expect(feather.users.refreshTokens({}, "foo")).to.be.rejectedWith(
+    expect(gateway.users.refreshTokens({}, "foo")).to.be.rejectedWith(
       `expected param 'id' to be of type 'string'`
     );
 
-    expect(feather.users.refreshTokens("foo", 123)).to.be.rejectedWith(
+    expect(gateway.users.refreshTokens("foo", 123)).to.be.rejectedWith(
       `expected param 'refreshToken' to be of type 'string'`
     );
   });
@@ -729,7 +689,7 @@ describe("feather.users.refreshTokens", function() {
       .times(1)
       .reply(200, sampleUserAuthenticated);
     return expect(
-      feather.users.refreshTokens("USR_foo", "foo")
+      gateway.users.refreshTokens("USR_foo", "foo")
     ).to.eventually.deep.equal(utils.snakeToCamelCase(sampleUserAuthenticated));
   });
 
@@ -738,12 +698,12 @@ describe("feather.users.refreshTokens", function() {
       .post("/v1/users/USR_foo/tokens", "refresh_token=foo")
       .replyWithError("boom");
     return expect(
-      feather.users.refreshTokens("USR_foo", "foo")
+      gateway.users.refreshTokens("USR_foo", "foo")
     ).to.be.rejectedWith("boom");
   });
 });
 
-describe("feather.users.revokeTokens", function() {
+describe("gateway.users.revokeTokens", function() {
   beforeEach(function() {
     nock.disableNetConnect();
   });
@@ -754,19 +714,19 @@ describe("feather.users.revokeTokens", function() {
   });
 
   it("should reject invalid input", function() {
-    expect(feather.users.revokeTokens(true, "foo")).to.be.rejectedWith(
+    expect(gateway.users.revokeTokens(true, "foo")).to.be.rejectedWith(
       `expected param 'id' to be of type 'string'`
     );
 
-    expect(feather.users.revokeTokens(123, "foo")).to.be.rejectedWith(
+    expect(gateway.users.revokeTokens(123, "foo")).to.be.rejectedWith(
       `expected param 'id' to be of type 'string'`
     );
 
-    expect(feather.users.revokeTokens({}, "foo")).to.be.rejectedWith(
+    expect(gateway.users.revokeTokens({}, "foo")).to.be.rejectedWith(
       `expected param 'id' to be of type 'string'`
     );
 
-    expect(feather.users.revokeTokens("foo", 123)).to.be.rejectedWith(
+    expect(gateway.users.revokeTokens("foo", 123)).to.be.rejectedWith(
       `expected param 'refreshToken' to be of type 'string'`
     );
   });
@@ -782,7 +742,7 @@ describe("feather.users.revokeTokens", function() {
       .times(1)
       .reply(200, sampleUserAuthenticated);
     return expect(
-      feather.users.revokeTokens("USR_foo", "foo")
+      gateway.users.revokeTokens("USR_foo", "foo")
     ).to.eventually.deep.equal(utils.snakeToCamelCase(sampleUserAuthenticated));
   });
 
@@ -791,14 +751,14 @@ describe("feather.users.revokeTokens", function() {
       .delete("/v1/users/USR_foo/tokens?refresh_token=foo")
       .replyWithError("boom");
     return expect(
-      feather.users.revokeTokens("USR_foo", "foo")
+      gateway.users.revokeTokens("USR_foo", "foo")
     ).to.be.rejectedWith("boom");
   });
 });
 
 // * * * * * Gateway * * * * * //
 
-describe("feather._gateway", function() {
+describe("_gateway", function() {
   beforeEach(function() {
     nock.disableNetConnect();
   });
@@ -812,7 +772,7 @@ describe("feather._gateway", function() {
     const scope = nock("http://localhost:8080")
       .get("/v1/users/USR_foo", {})
       .reply(200, "!@#$%^");
-    return expect(feather.users.retrieve("USR_foo", "foo")).to.be.rejectedWith(
+    return expect(gateway.users.retrieve("USR_foo", "foo")).to.be.rejectedWith(
       "invalid json response body at http://localhost:8080/v1/users/USR_foo reason: Unexpected token ! in JSON at position 0"
     );
   });
