@@ -19,17 +19,19 @@ $ yarn add feather-client-js
 The Feather package must be initialized with your project's API key, available on the [Feather Dashboard](https://feather.id/dashboard). Include the API key when you require the package:
 
 ```js
-import { Feather } from "feather-client-js";
+import { FeatherClient } from "feather-client-js";
 
-const feather = Feather("YOUR_API_KEY");
+const feather = FeatherClient("YOUR_API_KEY");
 ```
 
 To listen for changes to the authentication state:
 
 ```js
-feather.onStateChange(currentUser => {
+const unsubscribe = feather.onStateChange(currentUser => {
   console.log(`The current user is: ${JSON.stringify(currentUser)}`);
 });
+
+unsubscribe();
 ```
 
 To sign in:
