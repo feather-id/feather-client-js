@@ -16,7 +16,8 @@ function Client(apiKey, config = {}) {
   }
   this._gateway = Gateway(apiKey, config);
 
-  console.log("[Feather] initializing client");
+  if (process.env.NODE_ENV === "development")
+    console.log("[Feather] initializing client");
 
   const that = this;
   fetchCurrentState()
