@@ -4,7 +4,6 @@ const getCurrentCredential = require("./currentCredential/get.js");
 const newCurrentCredential = require("./newCurrentCredential.js");
 const getCurrentUser = require("./currentUser/get.js");
 const newCurrentUser = require("./newCurrentUser.js");
-const onStateChange = require("./onStateChange.js");
 
 function Client(apiKey, config = {}) {
   if (!(this instanceof Client)) {
@@ -43,8 +42,10 @@ function Client(apiKey, config = {}) {
   this._onStateChangeObservers = [];
   this.onStateChange = observer => {
     this._onStateChangeObservers.push(observer);
-    // TODO return "unsubscribe" function
     this.currentUser().then(currentUser => observer(currentUser));
+    return () => {
+      this._unsubscribeObserver(observer);
+    };
   };
 
   this.passwords = this._gateway.passwords;
@@ -104,6 +105,16 @@ Client.prototype = {
         })
         .catch(error => reject(error));
     });
+  },
+
+  /**
+   * @private
+   * This may be removed in the future.
+   */
+  _unsubscribeObserver(o) {
+    this._onStateChangeObservers = this._onStateChangeObservers.filter(
+      observer => observer !== o
+    );
   }
 };
 
