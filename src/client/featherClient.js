@@ -87,7 +87,7 @@ FeatherClient.prototype = {
           if (sessionStorage) {
             sessionStorage.setItem(
               "feather.currentUser.idToken",
-              currentUser ? currentUser.tokens.idToken : null
+              user ? user.tokens.idToken : null
             );
           }
           return that._notifyStateObservers();
