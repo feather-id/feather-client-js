@@ -43,7 +43,9 @@ function FeatherClient(apiKey, config = {}) {
   this._onStateChangeObservers = [];
   this.onStateChange = observer => {
     this._onStateChangeObservers.push(observer);
-    this.currentUser().then(currentUser => observer(currentUser));
+    this.currentUser()
+      .then(currentUser => observer(currentUser))
+      .catch(e => {});
     return () => {
       this._unsubscribeObserver(observer);
     };
