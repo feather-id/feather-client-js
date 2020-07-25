@@ -9,10 +9,12 @@ function FeatherClient(apiKey, config = {}) {
   if (!(this instanceof FeatherClient)) {
     return new FeatherClient(apiKey, config);
   }
-  if (!window.indexedDB) {
-    throw new Error(
-      "Your browser does not support a stable version of IndexedDB. This means Feather's stateful client interface is not supported on this device. For help or more information, please contact us at hello@feather.id."
-    );
+  if (typeof window !== "undefined") {
+    if (!window.indexedDB) {
+      throw new Error(
+        "Your browser does not support a stable version of IndexedDB. This means Feather's stateful client interface is not supported on this device. For help or more information, please contact us at hello@feather.id."
+      );
+    }
   }
   this._gateway = Gateway(apiKey, config);
 
@@ -85,15 +87,7 @@ FeatherClient.prototype = {
           state.user = user;
           return updateCurrentState(state);
         })
-        .then(() => {
-          if (sessionStorage) {
-            sessionStorage.setItem(
-              "feather.currentUser.tokens.idToken",
-              user ? user.tokens.idToken : null
-            );
-          }
-          return that._notifyStateObservers();
-        })
+        .then(() => that._notifyStateObservers())
         .then(() => resolve())
         .catch(error => {});
     });
