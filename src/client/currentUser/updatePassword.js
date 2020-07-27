@@ -1,17 +1,7 @@
-module.exports = function updatePassword(
-  client,
-  user,
-  newPassword,
-  credentialToken
-) {
+module.exports = function updatePassword(client, newPassword, credentialToken) {
   return new Promise(function(resolve, reject) {
-    client._gateway.users
-      .updatePassword(
-        user.id,
-        newPassword,
-        user.tokens.accessTokens.feather,
-        credentialToken
-      )
+    client._gateway.passwords
+      .create(newPassword, credentialToken)
       .then(updatedUser => {
         updatedUser.tokens = user.tokens;
         return client._setCurrentUser(updatedUser);

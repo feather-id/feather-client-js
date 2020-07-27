@@ -9,21 +9,21 @@ const passwords = {
   _gateway: null,
 
   /**
-   * Creates a password
-   * @arg password
+   * Updates a password
+   * @arg newPassword
    * @arg credentialToken
    * @return password
    */
-  create: function(password, credentialToken) {
+  update: function(newPassword, credentialToken) {
     const that = this;
     return new Promise(function(resolve, reject) {
       // Validate input
-      if (typeof password !== "string") {
+      if (typeof newPassword !== "string") {
         reject(
           new FeatherError({
             type: FeatherErrorType.VALIDATION,
             code: FeatherErrorCode.PARAMETER_INVALID,
-            message: `expected param 'password' to be of type 'string'`
+            message: `expected param 'newPassword' to be of type 'string'`
           })
         );
         return;
@@ -40,7 +40,7 @@ const passwords = {
       }
 
       // Send request
-      const data = { password, credentialToken };
+      const data = { newPassword, credentialToken };
       const path = `/passwords`;
       that._httpGateway
         .sendRequest("POST", path, data)
